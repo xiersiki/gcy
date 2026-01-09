@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import type { ComponentType } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { HomePage } from '@app/views/home/HomePage'
@@ -9,7 +10,7 @@ const workRoutes = worksRegistry.map((item) => ({
   Component: lazy(item.loader),
 }))
 
-function WorkRoute({ Component }: { Component: React.ComponentType }) {
+function WorkRoute({ Component }: { Component: ComponentType }) {
   return (
     <Suspense fallback={null}>
       <Component />

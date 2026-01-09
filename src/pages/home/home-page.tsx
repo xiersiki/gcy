@@ -1,5 +1,4 @@
 import { useState } from 'react'
-
 import { worksRegistry } from '@works/registry'
 import WorkCard from '@shared/ui/components/WorkCard'
 
@@ -15,6 +14,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen pb-20">
+      {/* Hero Section */}
       <section className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center">
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
@@ -27,6 +27,7 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Filter Section */}
       <section className="sticky top-[64px] z-40 bg-white/95 backdrop-blur-sm py-4 border-b border-gray-100 mb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-2 overflow-x-auto pb-2 no-scrollbar">
@@ -47,6 +48,7 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Grid Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {filteredWorks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -69,6 +71,7 @@ export function HomePage() {
         )}
       </main>
 
+      {/* Footer Info */}
       <footer className="mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center border-t border-gray-100 pt-12">
         <p className="text-gray-400 text-sm">
           &copy; {new Date().getFullYear()} Alex Dev. Designed with precision and crafted with code.

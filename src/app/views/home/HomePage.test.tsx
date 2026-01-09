@@ -11,6 +11,6 @@ describe('HomePage', () => {
         <HomePage />
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: '个人作品集合' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /selected/i })).toBeInTheDocument()
   })
 })

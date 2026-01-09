@@ -10,6 +10,8 @@ export default defineConfig({
       '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
       '@works': fileURLToPath(new URL('./src/works', import.meta.url)),
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
+      '@pages': fileURLToPath(new URL('./src/app/pages', import.meta.url)),
+      '@components': fileURLToPath(new URL('./src/app/components', import.meta.url)),
     },
   },
   test: {

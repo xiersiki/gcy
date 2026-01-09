@@ -5,7 +5,9 @@
     "paths": {
       "@app/*": ["src/app/*"],
       "@works/*": ["src/works/*"],
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@pages/*": ["src/app/pages/*"],
+      "@components/*": ["src/app/components/*"]
     },
     "target": "ES2022",
     "useDefineForClassFields": true,
