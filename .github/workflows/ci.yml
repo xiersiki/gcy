@@ -14,6 +14,8 @@ jobs:
         with:
           node-version: 20
       - uses: pnpm/action-setup@v4
+      - name: Prune pnpm store (fix tarball integrity)
+        run: pnpm store prune
       - run: pnpm install --frozen-lockfile
       - run: pnpm run format:check
       - run: pnpm run lint

@@ -22,8 +22,9 @@ export function WorksHome({ authors, works, categories }: WorksHomeProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const filteredWorks = useMemo(() => {
-    if (activeCategory === 'All') return works
-    return works.filter((w) => w.category === activeCategory)
+    const completed = works.filter((w) => w.type !== 'idea' && !w.draft)
+    if (activeCategory === 'All') return completed
+    return completed.filter((w) => w.category === activeCategory)
   }, [activeCategory, works])
 
   const boardItems = useMemo(() => {
@@ -61,29 +62,18 @@ export function WorksHome({ authors, works, categories }: WorksHomeProps) {
         </div>
       </section>
 
-      {filteredWorks.length ? (
-        <>
-          <div className="grid">
-            {filteredWorks.map((w) => (
-              <WorkCard key={w.id} work={w} />
-            ))}
-          </div>
+      <div className="grid">
+        {filteredWorks.map((w) => (
+          <WorkCard key={w.id} work={w} />
+        ))}
+      </div>
 
-          <IdeaBoardSection
-            authors={authors}
-            ideas={boardItems}
-            onSelectIdea={(id) => setSelectedIdeaId(id)}
-            onOpenPublish={() => setIsCreateOpen(true)}
-          />
-        </>
-      ) : (
-        <div className={styles.empty}>
-          <h3>No projects found in this category</h3>
-          <button type="button" onClick={() => setActiveCategory('All')}>
-            Back to All Works
-          </button>
-        </div>
-      )}
+      <IdeaBoardSection
+        authors={authors}
+        ideas={boardItems}
+        onSelectIdea={(id) => setSelectedIdeaId(id)}
+        onOpenPublish={() => setIsCreateOpen(true)}
+      />
 
       <IdeaDetailsModal
         authors={authors}
