@@ -5,9 +5,10 @@
   "type": "module",
   "packageManager": "pnpm@10.23.0",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "typecheck": "tsc -b",
+    "dev": "pnpm content:build && next dev",
+    "build": "pnpm content:build && next build",
+    "start": "next start",
+    "typecheck": "pnpm content:build && tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
@@ -16,7 +17,8 @@
     "test:ci": "vitest run",
     "coverage": "vitest run --coverage",
     "prepare": "husky",
-    "preview": "vite preview"
+    "content:build": "node scripts/content-build.mjs",
+    "content:validate": "node scripts/content-validate.mjs"
   },
   "lint-staged": {
     "*": [
@@ -27,35 +29,39 @@
     ]
   },
   "dependencies": {
+    "@mdx-js/react": "^3.1.1",
+    "next": "^15.1.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^6.30.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.39.1",
+    "@mdx-js/loader": "^3.1.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@next/mdx": "^15.1.0",
+    "@types/mdx": "^2.0.13",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "less": "^4.2.2",
+    "jsdom": "^26.0.0",
     "lint-staged": "^15.4.3",
     "prettier": "^3.5.1",
-    "jsdom": "^26.0.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^14.6.1",
+    "remark-gfm": "^4.0.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "@vitest/coverage-v8": "^3.2.4",
     "vitest": "^3.2.4",
-    "vite": "^5.4.11"
+    "yaml": "^2.8.1",
+    "zod": "^3.25.76"
   }
 }
