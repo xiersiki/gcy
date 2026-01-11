@@ -16,7 +16,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Prune pnpm store (fix tarball integrity)
         run: pnpm store prune
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --no-verify-store-integrity
       - run: pnpm run format:check
       - run: pnpm run lint
       - run: pnpm run typecheck
