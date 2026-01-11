@@ -11,10 +11,17 @@ export type DemoFrameProps = {
 export function DemoFrame({ src, title, height }: DemoFrameProps) {
   const initialHeight = useMemo(() => (height && height > 0 ? height : 720), [height])
   const [frameHeight, setFrameHeight] = useState(initialHeight)
+  const expectedOrigin = useMemo(() => {
+    try {
+      return new URL(src, window.location.href).origin
+    } catch {
+      return null
+    }
+  }, [src])
 
   useEffect(() => {
     function onMessage(event: MessageEvent) {
-      if (event.origin !== window.location.origin) return
+      if (expectedOrigin && event.origin !== expectedOrigin) return
       const data = event.data
       if (!data || typeof data !== 'object') return
       if (data.type !== 'demo:resize') return
@@ -26,7 +33,7 @@ export function DemoFrame({ src, title, height }: DemoFrameProps) {
 
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [])
+  }, [expectedOrigin])
 
   return (
     <div style={{ width: '100%', margin: '24px 0' }}>

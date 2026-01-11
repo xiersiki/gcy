@@ -7,7 +7,11 @@ function postResize() {
     document.documentElement.offsetHeight,
     document.body?.offsetHeight ?? 0,
   )
-  window.parent?.postMessage({ type: 'demo:resize', height }, window.location.origin)
+  let targetOrigin = '*'
+  try {
+    if (document.referrer) targetOrigin = new URL(document.referrer).origin
+  } catch {}
+  window.parent?.postMessage({ type: 'demo:resize', height }, targetOrigin)
 }
 
 function createStyle() {
