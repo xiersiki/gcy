@@ -1,4 +1,3 @@
-// 由 content-validate.mjs 生成
 import type { AuthorProfile, WorkEntry, WorkIndexItem, WorkMeta } from '../content/types'
 
 export const authors: Record<string, AuthorProfile> = {

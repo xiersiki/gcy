@@ -1,10 +1,11 @@
-# 个人作品集合（Portfolio）
+# 作品集合（Portfolio）
 
-基于 React + TypeScript + Vite 的个人作品集合站点，已内置工程化配置（质量控制、提交规范、测试、CI/CD），用于后续快速迭代。
+一个内容驱动的作品/点子展示站：作者与作品以内容包（YAML + MDX）形式提交，构建期生成索引供 Next.js 页面消费，适合多人通过 PR 协作维护。
 
 ## 技术栈
 
-- Vite + React + TypeScript
+- Next.js（App Router）+ React + TypeScript
+- MDX（作品正文）+ YAML（作者/作品元信息）
 - ESLint + Prettier
 - Husky + lint-staged + commitlint（Conventional Commits）
 - Vitest + Testing Library
@@ -19,23 +20,45 @@ pnpm dev
 
 ## 常用脚本
 
-- 开发：`pnpm dev`
-- 构建：`pnpm build`
-- 预览：`pnpm preview`
+- 开发：`pnpm dev`（会先运行 `content:build` 生成内容索引）
+- 构建：`pnpm build`（会先运行 `content:build` 再进行 Next.js 构建）
+- 生产启动：`pnpm start`
 - 类型检查：`pnpm typecheck`
 - ESLint：`pnpm lint` / `pnpm lint:fix`
 - Prettier：`pnpm format` / `pnpm format:check`
 - 测试：`pnpm test` / `pnpm test:ci` / `pnpm coverage`
+- 内容索引生成：`pnpm content:build`
+- 内容校验：`pnpm content:validate`
 
 ## 目录结构（约定）
 
 ```
+content/
+  authors/<authorId>/profile.yml           作者资料
+  works/<authorId>/<slug>/
+    meta.yml                               作品元信息
+    index.mdx                              作品正文（MDX）
+scripts/
+  content-build.mjs                        构建期扫描内容并生成索引
 src/
-  app/                 应用入口与路由/Provider（后续扩展）
-  pages/               页面级模块
-  styles/              全局样式
-  test/                测试初始化与工具
+  app/                                    Next.js App Router 页面
+  features/                                可复用的展示组件/页面模块
+  content/                                 TypeScript 内容类型定义
+  generated/                               由 content:build 生成的内容索引（不要手改）
+  test/                                    测试初始化与工具
 ```
+
+## 如何新增内容（多人协作）
+
+1. 新增作者：
+   - 新建 `content/authors/<authorId>/profile.yml`
+   - `profile.yml` 内的 `id` 必须等于目录名 `<authorId>`
+2. 新增作品：
+   - 新建 `content/works/<authorId>/<slug>/meta.yml`
+   - 新建 `content/works/<authorId>/<slug>/index.mdx`
+3. 本地验证：
+   - `pnpm content:validate` 校验 YAML schema
+   - `pnpm dev` 或 `pnpm build` 会自动运行 `content:build` 生成索引
 
 ## 提交规范
 
@@ -53,5 +76,3 @@ chore: 升级依赖
 
 - CI：在 PR / push(main) 时执行 format、lint、typecheck、test、build
 - Pages：push(main) 自动构建并发布到 GitHub Pages
-
-本项目已在 [vite.config.ts](file:///Users/bytedance/code/gcy/vite.config.ts) 支持 `BASE_PATH`，用于 GitHub Pages 的子路径部署。
