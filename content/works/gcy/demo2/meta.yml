@@ -6,3 +6,8 @@ tags:
   - demo
   - demo2
 category: Web App
+demo:
+  kind: iframe
+  src: /demos/gcy/demo2/
+  devSrc: http://localhost:5173/
+  height: 720

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 
+import { DemoFrame } from '@/components/DemoFrame'
 import { authors, workLoaders, works } from '@/generated/content'
 
 export async function generateStaticParams() {
@@ -48,6 +49,18 @@ export default async function WorkPage({
           {author ? <span>{` · ${author.name}`}</span> : null}
         </div>
       </header>
+
+      {work.meta.demo?.kind === 'iframe' ? (
+        <DemoFrame
+          src={
+            process.env.NODE_ENV === 'development' && work.meta.demo.devSrc
+              ? work.meta.demo.devSrc
+              : work.meta.demo.src
+          }
+          height={work.meta.demo.height}
+          title={`${work.meta.title} Demo`}
+        />
+      ) : null}
 
       <article>
         <MdxContent />

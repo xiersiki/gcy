@@ -24,6 +24,15 @@ const AuthorProfileSchema = z
 
 const WorkTypeSchema = z.enum(['case-study', 'idea', 'demo', 'snippet'])
 
+const WorkDemoSchema = z
+  .object({
+    kind: z.literal('iframe'),
+    src: z.string().min(1),
+    devSrc: z.string().min(1).optional(),
+    height: z.number().int().positive().optional(),
+  })
+  .strict()
+
 const WorkMetaSchema = z
   .object({
     title: z.string().min(1),
@@ -34,6 +43,7 @@ const WorkMetaSchema = z
     category: z.string().optional(),
     cover: z.string().optional(),
     draft: z.boolean().optional(),
+    demo: WorkDemoSchema.optional(),
     external: z
       .object({
         demoUrl: z.string().optional(),

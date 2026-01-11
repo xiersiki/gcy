@@ -10,6 +10,13 @@ export type AuthorProfile = {
 
 export type WorkType = 'case-study' | 'idea' | 'demo' | 'snippet'
 
+export type WorkDemo = {
+  kind: 'iframe'
+  src: string
+  devSrc?: string
+  height?: number
+}
+
 export type WorkMeta = {
   title: string
   summary: string
@@ -19,6 +26,7 @@ export type WorkMeta = {
   category?: string
   cover?: string
   draft?: boolean
+  demo?: WorkDemo
   external?: {
     demoUrl?: string
     repoUrl?: string

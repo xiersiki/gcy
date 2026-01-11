@@ -24,6 +24,12 @@ export const works: Record<string, { id: string; authorId: string; slug: string;
         date: '2026-01-02',
         tags: ['demo', 'demo2'],
         category: 'Web App',
+        demo: {
+          kind: 'iframe',
+          src: '/demos/gcy/demo2/',
+          devSrc: 'http://localhost:5173/',
+          height: 720,
+        },
       },
     },
     'gcy/demo': {

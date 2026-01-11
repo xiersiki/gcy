@@ -6,7 +6,8 @@
   "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "pnpm content:build && next dev",
-    "build": "pnpm content:build && next build && rm -rf dist && cp -R out dist",
+    "dev:work": "node scripts/dev-work.mjs",
+    "build": "pnpm content:build && next build && pnpm demos:build && node scripts/assemble-dist.mjs",
     "start": "next start",
     "typecheck": "pnpm content:build && tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings=0",
@@ -18,7 +19,8 @@
     "coverage": "vitest run --coverage",
     "prepare": "husky",
     "content:build": "node scripts/content-build.mjs",
-    "content:validate": "node scripts/content-validate.mjs"
+    "content:validate": "node scripts/content-validate.mjs",
+    "demos:build": "pnpm -r --filter \"./demos/**\" run build"
   },
   "lint-staged": {
     "*": [
@@ -30,7 +32,7 @@
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
-    "next": "^15.1.0",
+    "next": "15.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -45,7 +47,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@next/mdx": "^15.1.0",
+    "@next/mdx": "15.1.0",
     "@types/mdx": "^2.0.13",
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.39.1",
