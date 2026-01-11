@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 import { getSupabaseBrowserClient } from '@/server/supabase/browser'
+import styles from './AuthButton.module.scss'
 
 export function AuthButton() {
   const [email, setEmail] = useState<string | null>(null)
@@ -28,23 +29,22 @@ export function AuthButton() {
 
   if (!email) {
     return (
-      <Link href="/login" style={{ fontWeight: 900 }}>
-        登录
+      <Link href="/login" className={styles.loginBtn}>
+        登录 / 注册
       </Link>
     )
   }
 
   return (
-    <form action="/auth/logout" method="post" style={{ display: 'inline-flex', gap: 10 }}>
-      <span style={{ color: '#6b7280', fontSize: 12, maxWidth: 180, overflow: 'hidden' }}>
+    <div className={styles.userContainer}>
+      <span className={styles.userEmail} title={email}>
         {email}
       </span>
-      <button
-        type="submit"
-        style={{ fontWeight: 900, background: 'transparent', border: 'none', cursor: 'pointer' }}
-      >
-        退出
-      </button>
-    </form>
+      <form action="/auth/logout" method="post">
+        <button type="submit" className={styles.logoutBtn}>
+          退出
+        </button>
+      </form>
+    </div>
   )
 }

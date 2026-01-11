@@ -1,0 +1,73 @@
+// Colors
+$bg-dark: #020617; // Deeper blue-black
+$bg-card: rgba(30, 41, 59, 0.4);
+$border-color: rgba(51, 65, 85, 0.5);
+$primary-color: #4f46e5;
+$primary-hover: #6366f1;
+$secondary-color: #10b981;
+$text-main: #f8fafc;
+$text-secondary: #94a3b8;
+$text-muted: #64748b;
+
+// Gradients
+$grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+$grad-text: linear-gradient(to right, #818cf8, #22d3ee);
+$grad-surface: linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+
+// Spacing
+$container-max-width: 80rem;
+$nav-height: 4rem;
+
+// Slate Colors
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-700: #334155;
+$slate-800: #1e293b;
+$slate-900: #0f172a;
+
+// Effects
+$glass-bg: rgba(2, 6, 23, 0.8);
+$glass-blur: blur(16px);
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl:
+  0 20px 25px -5px rgba(0, 0, 0, 0.2),
+  0 10px 10px -5px rgba(0, 0, 0, 0.1);
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin glass-effect {
+  background: $glass-bg;
+  backdrop-filter: $glass-blur;
+  border-bottom: 1px solid $border-color;
+}
+
+@mixin card-style {
+  background: $bg-card;
+  backdrop-filter: blur(8px);
+  border: 1px solid $border-color;
+  border-radius: 1.25rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(30, 41, 59, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@mixin section-padding {
+  padding: 6rem 1.5rem;
+}

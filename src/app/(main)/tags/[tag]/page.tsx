@@ -1,7 +1,9 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { BackButton } from '@/components/BackButton'
+import { WorkCard } from '@/features/works/WorkCard'
 import { tagsIndex, worksList } from '@/generated/content'
+import styles from '@/features/works/WorksHome.module.scss'
 
 export async function generateStaticParams() {
   return Object.keys(tagsIndex).map((tag) => ({ tag }))
@@ -16,14 +18,20 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
 
   return (
     <main>
-      <h1>{`#${tag}`}</h1>
-      <ul>
+      <BackButton label="Back to All Works" />
+
+      <div className={styles.sectionHeader}>
+        <div>
+          <h1 className={styles.sectionTitle}>{`#${tag}`}</h1>
+          <p className={styles.sectionSubtitle}>{`Found ${works.length} works with this tag.`}</p>
+        </div>
+      </div>
+
+      <div className={styles.grid}>
         {works.map((w) => (
-          <li key={w.id}>
-            <Link href={`/works/${w.authorId}/${w.slug}`}>{w.title}</Link>
-          </li>
+          <WorkCard key={w.id} work={w} />
         ))}
-      </ul>
+      </div>
     </main>
   )
 }

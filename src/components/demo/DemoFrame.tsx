@@ -36,16 +36,18 @@ export function DemoFrame({ src, title, height }: DemoFrameProps) {
   }, [expectedOrigin])
 
   return (
-    <div style={{ width: '100%', margin: '24px 0' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
       <iframe
         title={title ?? 'Demo'}
         src={src}
         style={{
           width: '100%',
           height: frameHeight,
-          border: '1px solid rgba(0,0,0,0.12)',
-          borderRadius: 12,
-          background: 'transparent',
+          border: 'none',
+          background: '#ffffff',
+          display: 'block',
+          margin: 0,
+          padding: 0,
         }}
         sandbox="allow-scripts allow-same-origin"
       />

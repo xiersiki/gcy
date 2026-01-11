@@ -1,10 +1,11 @@
 'use client'
 
-import { Alert, Button, Input, Modal, Select, Space, Upload } from '@arco-design/web-react'
-import type { UploadItem } from '@arco-design/web-react/es/Upload'
+import { Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import { Modal } from '@/components/Modal'
+import modalStyles from '@/components/Modal.module.scss'
 
 type IdeaFormDraft = {
   authorId: string
@@ -44,9 +45,9 @@ function validateDraft(draft: IdeaFormDraft) {
   const authorId = draft.authorId.trim()
   const title = draft.title.trim()
   const summary = draft.summary.trim()
-  if (!authorId) return { ok: false as const, message: '请选择作者' }
-  if (!title) return { ok: false as const, message: '请填写标题' }
-  if (!summary) return { ok: false as const, message: '请填写一句话简介' }
+  if (!authorId) return { ok: false as const, message: 'Please select an author' }
+  if (!title) return { ok: false as const, message: 'Please enter a title' }
+  if (!summary) return { ok: false as const, message: 'Please enter a summary' }
 
   const tags = draft.tagsText
     .split(',')
@@ -81,14 +82,12 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
     details: '',
     tagsText: '',
   }))
-  const [checkResult, setCheckResult] = useState<{ ok: boolean; branch?: string } | null>(null)
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' })
-  const [uploadList, setUploadList] = useState<UploadItem[]>([])
+  const [uploadList, setUploadList] = useState<{ file: File; url: string }[]>([])
 
   useEffect(() => {
     if (!open) return
     setSubmitState({ status: 'idle' })
-    setCheckResult(null)
     setUploadList([])
     setDraft((prev) => ({
       authorId: prev.authorId || authorIds[0] || '',
@@ -106,8 +105,32 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
     }
   }, [open, uploadList])
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const maxBytes = 5 * 1024 * 1024
+
+    const next = files
+      .filter((f) => f.size <= maxBytes)
+      .slice(0, 6 - uploadList.length)
+      .map((f) => ({
+        file: f,
+        url: URL.createObjectURL(f),
+      }))
+
+    setUploadList((prev) => [...prev, ...next])
+    setSubmitState({ status: 'idle' })
+  }
+
+  const removeFile = (index: number) => {
+    setUploadList((prev) => {
+      const next = [...prev]
+      const removed = next.splice(index, 1)[0]
+      if (removed.url.startsWith('blob:')) URL.revokeObjectURL(removed.url)
+      return next
+    })
+  }
+
   async function submit() {
-    setCheckResult(null)
     setSubmitState({ status: 'idle' })
 
     const validated = validateDraft(draft)
@@ -118,9 +141,7 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
 
     setSubmitState({ status: 'submitting' })
     try {
-      const images = uploadList
-        .map((it) => it.originFile)
-        .filter((f): f is File => f instanceof File)
+      const images = uploadList.map((it) => it.file)
 
       const res =
         images.length > 0
@@ -141,38 +162,13 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
 
       if (!res.ok) {
         const raw = await res.text().catch(() => '')
-        try {
-          const parsed = JSON.parse(raw) as { ok?: boolean; error?: { message?: string } }
-          if (parsed?.ok === false && parsed.error?.message) throw new Error(parsed.error.message)
-        } catch (e) {
-          void e
-        }
-        const detail = raw ? `：${raw.slice(0, 240)}` : ''
-        throw new Error(`提交失败（${res.status}）${detail}`)
+        throw new Error(`Submission failed (${res.status}): ${raw.slice(0, 100)}`)
       }
-      const data = (await res.json().catch(() => null)) as null | {
-        ok?: boolean
-        data?: {
-          authorId: string
-          slug: string
-          title: string
-          summary: string
-          tags?: string[]
-          status?: string
-          createdAt?: string
-          claimedBy?: string | null
-          claimPrUrl?: string | null
-          imageUrls?: string[]
-        }
-      }
+
+      const data = await res.json()
       const dto = data?.data
-      if (!data?.ok || !dto) throw new Error('提交成功但缺少 data 返回值')
-      const validated2 = validateDraft(draft)
-      if (!validated2.ok) throw new Error('提交成功但校验失败')
-      const status =
-        dto.status === 'in-progress' || dto.status === 'done' || dto.status === 'open'
-          ? dto.status
-          : 'open'
+      if (!data?.ok || !dto) throw new Error('Missing data in response')
+
       const idea: WorkIndexItem = {
         id: `${dto.authorId}/${dto.slug}`,
         authorId: dto.authorId,
@@ -181,9 +177,9 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
         summary: dto.summary,
         type: 'idea',
         date: (dto.createdAt || new Date().toISOString()).slice(0, 10),
-        tags: dto.tags ?? validated2.payload.tags,
+        tags: dto.tags ?? validated.payload.tags,
         idea: {
-          status,
+          status: dto.status || 'open',
           claimedBy: dto.claimedBy ?? undefined,
           claimPrUrl: dto.claimPrUrl ?? undefined,
           pending: false,
@@ -191,171 +187,176 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
       }
       setSubmitState({ status: 'success', idea })
       onPublished?.(idea)
+      setTimeout(onClose, 1500)
     } catch (err) {
-      const message = err instanceof Error ? err.message : '提交失败'
-      setSubmitState({ status: 'error', message })
+      setSubmitState({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Submission failed',
+      })
     }
   }
 
   return (
     <Modal
-      visible={open}
-      title="发布点子"
-      onCancel={onClose}
+      isOpen={open}
+      onClose={onClose}
+      title="Publish New Idea"
+      maxWidth="600px"
       footer={
-        <Space>
-          <Button
-            onClick={() => {
-              setSubmitState({ status: 'idle' })
-              const validated = validateDraft(draft)
-              if (!validated.ok) {
-                setSubmitState({ status: 'error', message: validated.message })
-                setCheckResult(null)
-                return
-              }
-              setCheckResult({
-                ok: true,
-                branch: `content/works/${validated.payload.authorId}/${validated.slug}`,
-              })
-            }}
+        <>
+          <button className={`${modalStyles.modalBtn} ${modalStyles.secondary}`} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={`${modalStyles.modalBtn} ${modalStyles.primary}`}
+            disabled={submitState.status === 'submitting'}
+            onClick={submit}
           >
-            校验
-          </Button>
-          <Button type="primary" loading={submitState.status === 'submitting'} onClick={submit}>
-            {submitState.status === 'submitting' ? '提交中…' : '提交'}
-          </Button>
-          <Button onClick={onClose}>关闭</Button>
-        </Space>
+            {submitState.status === 'submitting' ? 'Submitting...' : 'Publish Idea'}
+          </button>
+        </>
       }
     >
-      <Space direction="vertical" size={14} style={{ width: '100%' }}>
-        <div>
-          <div style={{ marginBottom: 6 }}>作者</div>
-          <Select
-            value={draft.authorId}
-            onChange={(v) => {
-              setDraft((prev) => ({ ...prev, authorId: String(v) }))
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-          >
-            {authorIds.map((id) => (
-              <Select.Option key={`author:${id}`} value={id}>
-                {authors[id]?.name ?? id}
-              </Select.Option>
-            ))}
-          </Select>
+      <div className={modalStyles.modalFormItem}>
+        <label>Author</label>
+        <select
+          className={modalStyles.modalSelect}
+          value={draft.authorId}
+          onChange={(e) => setDraft((prev) => ({ ...prev, authorId: e.target.value }))}
+        >
+          {authorIds.map((id) => (
+            <option key={id} value={id}>
+              {authors[id]?.name ?? id}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Title</label>
+        <input
+          className={modalStyles.modalInput}
+          value={draft.title}
+          onChange={(e) => setDraft((prev) => ({ ...prev, title: e.target.value }))}
+          placeholder="Briefly describe your idea"
+        />
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Summary</label>
+        <textarea
+          className={modalStyles.modalInput}
+          rows={3}
+          value={draft.summary}
+          onChange={(e) => setDraft((prev) => ({ ...prev, summary: e.target.value }))}
+          placeholder="What problem does it solve? What are the key features?"
+        />
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Details (Optional)</label>
+        <textarea
+          className={modalStyles.modalInput}
+          rows={5}
+          value={draft.details}
+          onChange={(e) => setDraft((prev) => ({ ...prev, details: e.target.value }))}
+          placeholder="Implementation tips, reference links, etc."
+        />
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Tags (Optional, comma separated)</label>
+        <input
+          className={modalStyles.modalInput}
+          value={draft.tagsText}
+          onChange={(e) => setDraft((prev) => ({ ...prev, tagsText: e.target.value }))}
+          placeholder="e.g. ui, animation, webgl"
+        />
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Reference Images (Optional, max 6)</label>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+            gap: '0.75rem',
+          }}
+        >
+          {uploadList.map((it, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: 'relative',
+                aspectRatio: '1',
+                borderRadius: '0.5rem',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <img
+                src={it.url}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                alt=""
+              />
+              <button
+                onClick={() => removeFile(idx)}
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  right: 2,
+                  background: 'rgba(0,0,0,0.5)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: 2,
+                }}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+          {uploadList.length < 6 && (
+            <label
+              style={{
+                aspectRatio: '1',
+                borderRadius: '0.5rem',
+                border: '1px dashed rgba(255,255,255,0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#94a3b8',
+                fontSize: '0.75rem',
+                gap: '0.25rem',
+              }}
+            >
+              <Plus size={20} />
+              <span>Upload</span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+          )}
         </div>
+      </div>
 
-        <div>
-          <div style={{ marginBottom: 6 }}>标题</div>
-          <Input
-            value={draft.title}
-            onChange={(v) => {
-              setDraft((prev) => ({ ...prev, title: v }))
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-            placeholder="一句话概括这个点子"
-          />
+      {submitState.status === 'error' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.error}`}>
+          {submitState.message}
         </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>一句话简介</div>
-          <Input.TextArea
-            value={draft.summary}
-            onChange={(v) => {
-              setDraft((prev) => ({ ...prev, summary: v }))
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-            autoSize={{ minRows: 3, maxRows: 6 }}
-            placeholder="这个点子想解决什么、有什么亮点"
-          />
+      )}
+      {submitState.status === 'success' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.success}`}>
+          Idea published successfully!
         </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>更多说明（可选）</div>
-          <Input.TextArea
-            value={draft.details}
-            onChange={(v) => {
-              setDraft((prev) => ({ ...prev, details: v }))
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-            autoSize={{ minRows: 5, maxRows: 12 }}
-            placeholder="建议包含：使用场景、参考链接、实现提示、验收标准等"
-          />
-        </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>标签（逗号分隔，可选）</div>
-          <Input
-            value={draft.tagsText}
-            onChange={(v) => {
-              setDraft((prev) => ({ ...prev, tagsText: v }))
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-            placeholder="比如: ui, animation, webgl"
-          />
-        </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>参考图片（可选，最多 6 张）</div>
-          <Upload
-            listType="picture-card"
-            accept="image/*"
-            multiple
-            limit={6}
-            autoUpload={false}
-            fileList={uploadList}
-            onChange={(fileList) => {
-              const maxBytes = 5 * 1024 * 1024
-              const next = (fileList ?? [])
-                .filter((it) => {
-                  const f = it.originFile
-                  if (f instanceof File && f.size > maxBytes) return false
-                  return true
-                })
-                .slice(0, 6)
-                .map((it) => {
-                  if (!it.url && it.originFile instanceof File) {
-                    return { ...it, url: URL.createObjectURL(it.originFile) }
-                  }
-                  return it
-                })
-              setUploadList(next)
-              setSubmitState({ status: 'idle' })
-              setCheckResult(null)
-            }}
-            onRemove={(file) => {
-              if (file.url?.startsWith('blob:')) URL.revokeObjectURL(file.url)
-              return true
-            }}
-          />
-          <div style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.6 }}>
-            用于描述目标效果（超过 5MB 的图片会被忽略）。
-          </div>
-        </div>
-
-        {checkResult ? (
-          <Alert
-            type={checkResult.ok ? 'success' : 'error'}
-            content={checkResult.ok ? `校验通过，将创建分支：${checkResult.branch}` : '校验未通过'}
-          />
-        ) : null}
-
-        {submitState.status === 'error' ? (
-          <Alert type="error" content={submitState.message} />
-        ) : null}
-        {submitState.status === 'success' ? (
-          <Alert
-            type="success"
-            content={<span>已发布到社区（登录用户可见，认领时才会创建 PR）</span>}
-          />
-        ) : null}
-      </Space>
+      )}
     </Modal>
   )
 }

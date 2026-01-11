@@ -1,9 +1,10 @@
 'use client'
 
-import { Alert, Button, Modal, Select, Space } from '@arco-design/web-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import { Modal } from '@/components/Modal'
+import modalStyles from '@/components/Modal.module.scss'
 
 type SubmitState =
   | { status: 'idle' }
@@ -36,7 +37,7 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
     if (!idea) return
     const authorId = implementAuthorId.trim()
     if (!authorId) {
-      setSubmitState({ status: 'error', message: '请选择实现作者' })
+      setSubmitState({ status: 'error', message: 'Please select an author' })
       return
     }
 
@@ -53,19 +54,17 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
       })
       if (!res.ok) {
         const raw = await res.text().catch(() => '')
-        const detail = raw ? `：${raw.slice(0, 240)}` : ''
-        throw new Error(`认领失败（${res.status}）${detail}`)
+        throw new Error(`Claim failed (${res.status}): ${raw.slice(0, 100)}`)
       }
-      const data = (await res.json().catch(() => null)) as null | {
-        ok?: boolean
-        data?: { prUrl?: string }
-      }
+      const data = await res.json()
       const prUrl = data?.ok ? data?.data?.prUrl : null
-      if (!prUrl) throw new Error('认领成功但缺少 prUrl 返回值')
+      if (!prUrl) throw new Error('Claim successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
     } catch (err) {
-      const message = err instanceof Error ? err.message : '认领失败'
-      setSubmitState({ status: 'error', message })
+      setSubmitState({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Claim failed',
+      })
     }
   }
 
@@ -73,59 +72,63 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
 
   return (
     <Modal
-      visible={open}
-      title={idea ? `认领点子：${idea.title}` : '认领点子'}
-      onCancel={onClose}
+      isOpen={open}
+      onClose={onClose}
+      title={idea ? `Claim Idea: ${idea.title}` : 'Claim Idea'}
       footer={
-        <Space>
-          <Button onClick={onClose}>关闭</Button>
-          <Button
-            type="primary"
-            disabled={isDisabled}
-            loading={submitState.status === 'submitting'}
+        <>
+          <button className={`${modalStyles.modalBtn} ${modalStyles.secondary}`} onClick={onClose}>
+            Close
+          </button>
+          <button
+            className={`${modalStyles.modalBtn} ${modalStyles.primary}`}
+            disabled={isDisabled || submitState.status === 'submitting'}
             onClick={submit}
           >
-            创建认领 PR
-          </Button>
-        </Space>
+            {submitState.status === 'submitting' ? 'Creating PR...' : 'Create Claim PR'}
+          </button>
+        </>
       }
     >
-      <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <div>
-          <div style={{ marginBottom: 6 }}>实现作者（会创建在该作者目录下）</div>
-          <Select
-            value={implementAuthorId}
-            onChange={(v) => {
-              setImplementAuthorId(String(v))
-              setSubmitState({ status: 'idle' })
-            }}
-          >
-            {authorIds.map((id) => (
-              <Select.Option key={`impl-author:${id}`} value={id}>
-                {authors[id]?.name ?? id}
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
+      <div className={modalStyles.modalFormItem}>
+        <label>Implementation Author</label>
+        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+          The project will be created under this author's directory.
+        </p>
+        <select
+          className={modalStyles.modalSelect}
+          value={implementAuthorId}
+          onChange={(e) => setImplementAuthorId(e.target.value)}
+        >
+          {authorIds.map((id) => (
+            <option key={id} value={id}>
+              {authors[id]?.name ?? id}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {submitState.status === 'error' ? (
-          <Alert type="error" content={submitState.message} />
-        ) : null}
-        {submitState.status === 'success' ? (
-          <Alert
-            type="success"
-            content={
-              <span>
-                已创建认领 PR：{' '}
-                <a href={submitState.prUrl} target="_blank" rel="noreferrer">
-                  {submitState.prUrl}
-                </a>
-                （合并后生效）
-              </span>
-            }
-          />
-        ) : null}
-      </Space>
+      {submitState.status === 'error' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.error}`}>
+          {submitState.message}
+        </div>
+      )}
+
+      {submitState.status === 'success' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.success}`}>
+          Claim PR created:{' '}
+          <a
+            href={submitState.prUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            View PR
+          </a>
+          <br />
+          (Takes effect after merging)
+        </div>
+      )}
     </Modal>
   )
 }

@@ -1,22 +1,24 @@
 import type { ReactNode } from 'react'
 
-import { NavBar } from '@/components/NavBar'
-
-import '@arco-design/web-react/dist/css/arco.css'
-import './globals.css'
+import './globals.scss'
 
 export const metadata = {
-  title: 'Portfolio',
-  description: 'A small collection of frontend ideas and works.',
+  title: 'DevForge | Creative Community',
+  description: "The showcase for the world's most innovative web components.",
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
-      <body>
-        <NavBar />
-        <div className="pageContainer">{children}</div>
-      </body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>{children}</body>
     </html>
   )
 }

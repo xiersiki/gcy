@@ -1,9 +1,10 @@
 'use client'
 
-import { Alert, Button, Input, Modal, Select, Space } from '@arco-design/web-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import { Modal } from '@/components/Modal'
+import modalStyles from '@/components/Modal.module.scss'
 
 type SubmitState =
   | { status: 'idle' }
@@ -40,7 +41,7 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
     if (!idea) return
     const authorId = implementAuthorId.trim()
     if (!authorId) {
-      setSubmitState({ status: 'error', message: '请选择实现作者' })
+      setSubmitState({ status: 'error', message: 'Please select an author' })
       return
     }
     setSubmitState({ status: 'submitting' })
@@ -57,16 +58,17 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
       })
       if (!res.ok) {
         const raw = await res.text().catch(() => '')
-        const detail = raw ? `：${raw.slice(0, 240)}` : ''
-        throw new Error(`创建完成 PR 失败（${res.status}）${detail}`)
+        throw new Error(`Failed to create completion PR (${res.status}): ${raw.slice(0, 100)}`)
       }
-      const data = (await res.json().catch(() => null)) as null | { prUrl?: string }
+      const data = await res.json()
       const prUrl = data?.prUrl
-      if (!prUrl) throw new Error('创建成功但缺少 prUrl 返回值')
+      if (!prUrl) throw new Error('Completion successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
     } catch (err) {
-      const message = err instanceof Error ? err.message : '创建失败'
-      setSubmitState({ status: 'error', message })
+      setSubmitState({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Submission failed',
+      })
     }
   }
 
@@ -75,80 +77,85 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
 
   return (
     <Modal
-      visible={open}
-      title={idea ? `提交实现：${idea.title}` : '提交实现'}
-      onCancel={onClose}
+      isOpen={open}
+      onClose={onClose}
+      title={idea ? `Complete Idea: ${idea.title}` : 'Submit Implementation'}
       footer={
-        <Space>
-          <Button onClick={onClose}>关闭</Button>
-          <Button type="primary" disabled={isDisabled} onClick={submit}>
-            创建完成 PR
-          </Button>
-        </Space>
+        <>
+          <button className={`${modalStyles.modalBtn} ${modalStyles.secondary}`} onClick={onClose}>
+            Close
+          </button>
+          <button
+            className={`${modalStyles.modalBtn} ${modalStyles.primary}`}
+            disabled={isDisabled}
+            onClick={submit}
+          >
+            {submitState.status === 'submitting' ? 'Creating PR...' : 'Create Completion PR'}
+          </button>
+        </>
       }
     >
-      <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <div>
-          <div style={{ marginBottom: 6 }}>实现作者（会创建在该作者目录下）</div>
-          <Select
-            value={implementAuthorId}
-            onChange={(v) => {
-              setImplementAuthorId(String(v))
-              setSubmitState({ status: 'idle' })
-            }}
+      <div className={modalStyles.modalFormItem}>
+        <label>Implementation Author</label>
+        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+          The work will be created under this author's directory.
+        </p>
+        <select
+          className={modalStyles.modalSelect}
+          value={implementAuthorId}
+          onChange={(e) => setImplementAuthorId(e.target.value)}
+        >
+          {authorIds.map((id) => (
+            <option key={id} value={id}>
+              {authors[id]?.name ?? id}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Work Type</label>
+        <select
+          className={modalStyles.modalSelect}
+          value={workType}
+          onChange={(e) => setWorkType(e.target.value as 'demo' | 'case-study')}
+        >
+          <option value="demo">Demo</option>
+          <option value="case-study">Case Study</option>
+        </select>
+      </div>
+
+      <div className={modalStyles.modalFormItem}>
+        <label>Work Title (Optional)</label>
+        <input
+          className={modalStyles.modalInput}
+          value={workTitle}
+          onChange={(e) => setWorkTitle(e.target.value)}
+          placeholder={idea?.title ?? 'Default to idea title'}
+        />
+      </div>
+
+      {submitState.status === 'error' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.error}`}>
+          {submitState.message}
+        </div>
+      )}
+
+      {submitState.status === 'success' && (
+        <div className={`${modalStyles.modalAlert} ${modalStyles.success}`}>
+          Completion PR created:{' '}
+          <a
+            href={submitState.prUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
           >
-            {authorIds.map((id) => (
-              <Select.Option key={`impl-author:${id}`} value={id}>
-                {authors[id]?.name ?? id}
-              </Select.Option>
-            ))}
-          </Select>
+            View PR
+          </a>
+          <br />
+          (Takes effect after merging)
         </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>作品类型</div>
-          <Select
-            value={workType}
-            onChange={(v) => {
-              setWorkType(v as 'demo' | 'case-study')
-              setSubmitState({ status: 'idle' })
-            }}
-          >
-            <Select.Option value="demo">demo</Select.Option>
-            <Select.Option value="case-study">case-study</Select.Option>
-          </Select>
-        </div>
-
-        <div>
-          <div style={{ marginBottom: 6 }}>作品标题（可选，默认使用点子标题）</div>
-          <Input
-            value={workTitle}
-            onChange={(v) => {
-              setWorkTitle(v)
-              setSubmitState({ status: 'idle' })
-            }}
-            placeholder={idea?.title ?? ''}
-          />
-        </div>
-
-        {submitState.status === 'error' ? (
-          <Alert type="error" content={submitState.message} />
-        ) : null}
-        {submitState.status === 'success' ? (
-          <Alert
-            type="success"
-            content={
-              <span>
-                已创建完成 PR：{' '}
-                <a href={submitState.prUrl} target="_blank" rel="noreferrer">
-                  {submitState.prUrl}
-                </a>
-                （合并后会上线并出现在作品区）
-              </span>
-            }
-          />
-        ) : null}
-      </Space>
+      )}
     </Modal>
   )
 }

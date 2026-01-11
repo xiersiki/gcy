@@ -1,36 +1,30 @@
 'use client'
 
+import { motion } from 'framer-motion'
+import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
-
+import { BgDecor } from './BgDecor'
 import { IdeaBoardSection } from './IdeaBoardSection'
 import { IdeaClaimModal } from './IdeaClaimModal'
 import { IdeaCompleteModal } from './IdeaCompleteModal'
 import { IdeaDetailsModal } from './IdeaDetailsModal'
 import { IdeaPublishModal } from './IdeaPublishModal'
-import { WorkCard } from './WorkCard'
-import styles from './WorksHome.module.css'
+import styles from './WorksHome.module.scss'
+import boardStyles from './IdeaBoardSection.module.scss'
 
-export type WorksHomeProps = {
+export type IdeasPageContentProps = {
   authors: Record<string, AuthorProfile>
   works: WorkIndexItem[]
-  categories: string[]
 }
 
-export function WorksHome({ authors, works, categories }: WorksHomeProps) {
-  const [activeCategory, setActiveCategory] = useState(categories[0] ?? 'All')
+export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isClaimOpen, setIsClaimOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
   const [communityIdeasRemote, setCommunityIdeasRemote] = useState<WorkIndexItem[]>([])
-
-  const filteredWorks = useMemo(() => {
-    const completed = works.filter((w) => w.type !== 'idea' && !w.draft)
-    if (activeCategory === 'All') return completed
-    return completed.filter((w) => w.category === activeCategory)
-  }, [activeCategory, works])
 
   const boardItems = useMemo(() => {
     return works
@@ -70,50 +64,37 @@ export function WorksHome({ authors, works, categories }: WorksHomeProps) {
   }, [communityIdeas, selectedIdeaId])
 
   return (
-    <main>
-      <section className={styles.hero}>
-        <h1 className={styles.title}>Selected Works Collection</h1>
-        <p className={styles.subtitle}>
-          我们把一些有意思的前端点子、实验和实现记录在这里，作为长期可维护的展示与索引。
-        </p>
-      </section>
-
-      <section className={styles.filterBar}>
-        <div className={styles.filters}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setActiveCategory(cat)}
-              className={`${styles.chip} ${activeCategory === cat ? styles.chipActive : ''}`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {filteredWorks.length ? (
-        <div className="grid">
-          {filteredWorks.map((w) => (
-            <WorkCard key={w.id} work={w} />
-          ))}
-        </div>
-      ) : (
-        <div className={styles.empty}>
-          <h3>这个分类下还没有已完成作品</h3>
-          <button type="button" onClick={() => setActiveCategory('All')}>
-            回到全部作品
+    <div className={styles.container}>
+      <BgDecor />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className={styles.sectionHeader}>
+          <div>
+            <h2 className={styles.sectionTitle}>Ideas Hub</h2>
+            <p className={styles.sectionSubtitle}>
+              Discover creative ideas or post your recruitment needs. Ideas can be claimed and
+              turned into reality.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={boardStyles.boardPublishButton}
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus size={18} />
+            Publish Idea
           </button>
         </div>
-      )}
 
-      <IdeaBoardSection
-        authors={authors}
-        ideas={communityIdeas}
-        onSelectIdea={(id) => setSelectedIdeaId(id)}
-        onOpenPublish={() => setIsCreateOpen(true)}
-      />
+        <IdeaBoardSection
+          authors={authors}
+          ideas={communityIdeas}
+          onSelectIdea={(id) => setSelectedIdeaId(id)}
+        />
+      </motion.div>
 
       <IdeaDetailsModal
         authors={authors}
@@ -147,6 +128,6 @@ export function WorksHome({ authors, works, categories }: WorksHomeProps) {
           setSelectedIdeaId(idea.id)
         }}
       />
-    </main>
+    </div>
   )
 }

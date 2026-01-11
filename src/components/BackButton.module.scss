@@ -1,0 +1,36 @@
+@import '../styles/theme.scss';
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  color: $slate-400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+
+  .iconWrapper {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.625rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    @include flex-center;
+    transition: all 0.2s;
+  }
+
+  &:hover {
+    color: white;
+
+    .iconWrapper {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(-4px);
+    }
+  }
+}

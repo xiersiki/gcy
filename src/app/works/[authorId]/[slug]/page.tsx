@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-
-import { DemoFrame } from '@/components/demo/DemoFrame'
 import { authors, workLoaders, works } from '@/generated/content'
+import { WorkDetailClient } from '@/features/works/WorkDetailClient'
 
 export async function generateStaticParams() {
   return Object.values(works)
@@ -40,42 +38,14 @@ export default async function WorkPage({
   if (!loader) notFound()
   const { default: MdxContent } = await loader()
 
+  const demoUrl =
+    work.meta.demo?.kind === 'iframe'
+      ? process.env.NODE_ENV === 'development' && work.meta.demo.devSrc
+        ? work.meta.demo.devSrc
+        : work.meta.demo.src
+      : undefined
+
   return (
-    <main>
-      <header>
-        <h1>{work.meta.title}</h1>
-        <p>{work.meta.summary}</p>
-        <div>
-          <span>{work.meta.date}</span>
-          {author ? <span>{` · ${author.name}`}</span> : null}
-          {work.meta.sourceIdeaId ? (
-            <span>
-              {` · 来源：`}
-              <Link
-                href={`/works/${work.meta.sourceIdeaId.split('/')[0]}/${work.meta.sourceIdeaId.split('/')[1]}`}
-              >
-                {work.meta.sourceIdeaId}
-              </Link>
-            </span>
-          ) : null}
-        </div>
-      </header>
-
-      {work.meta.demo?.kind === 'iframe' ? (
-        <DemoFrame
-          src={
-            process.env.NODE_ENV === 'development' && work.meta.demo.devSrc
-              ? work.meta.demo.devSrc
-              : work.meta.demo.src
-          }
-          height={work.meta.demo.height}
-          title={`${work.meta.title} Demo`}
-        />
-      ) : null}
-
-      <article>
-        <MdxContent />
-      </article>
-    </main>
+    <WorkDetailClient work={work} author={author} mdxContent={<MdxContent />} demoUrl={demoUrl} />
   )
 }

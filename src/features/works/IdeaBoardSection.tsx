@@ -1,25 +1,18 @@
 'use client'
 
-import { Button } from '@arco-design/web-react'
 import { useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
-import styles from './WorksHome.module.css'
+import styles from './IdeaBoardSection.module.scss'
 
 export type IdeaBoardSectionProps = {
   authors: Record<string, AuthorProfile>
   ideas: WorkIndexItem[]
   onSelectIdea: (id: string) => void
-  onOpenPublish: () => void
 }
 
-export function IdeaBoardSection({
-  authors,
-  ideas,
-  onSelectIdea,
-  onOpenPublish,
-}: IdeaBoardSectionProps) {
+export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSectionProps) {
   const [activeStatus, setActiveStatus] = useState<'All' | 'open' | 'in-progress' | 'done'>('All')
 
   const filteredIdeas = useMemo(() => {
@@ -28,39 +21,25 @@ export function IdeaBoardSection({
   }, [activeStatus, ideas])
 
   return (
-    <section className={styles.boardSection}>
-      <header className={styles.boardHeader}>
-        <div className={styles.boardHeaderRow}>
-          <h2 className={styles.boardTitle}>灵感/招募面板</h2>
-          <Button
-            className={styles.boardPublishButton}
-            onClick={() => {
-              onOpenPublish()
-            }}
+    <div className={styles.boardSection}>
+      <div className={styles.boardFilters}>
+        {(['All', 'open', 'in-progress', 'done'] as const).map((key) => (
+          <button
+            key={`idea-filter:${key}`}
+            type="button"
+            onClick={() => setActiveStatus(key)}
+            className={`${styles.chip} ${activeStatus === key ? styles.chipActive : ''}`}
           >
-            发布点子
-          </Button>
-        </div>
-        <p className={styles.boardSubtitle}>发布点子并附上参考图，方便后来者对齐目标效果。</p>
-        <div className={styles.boardFilters}>
-          {(['All', 'open', 'in-progress', 'done'] as const).map((key) => (
-            <button
-              key={`idea-filter:${key}`}
-              type="button"
-              onClick={() => setActiveStatus(key)}
-              className={`${styles.chip} ${activeStatus === key ? styles.chipActive : ''}`}
-            >
-              {key === 'All'
-                ? '全部'
-                : key === 'open'
-                  ? '可认领'
-                  : key === 'in-progress'
-                    ? '进行中'
-                    : '已实现'}
-            </button>
-          ))}
-        </div>
-      </header>
+            {key === 'All'
+              ? '全部'
+              : key === 'open'
+                ? '可认领'
+                : key === 'in-progress'
+                  ? '进行中'
+                  : '已实现'}
+          </button>
+        ))}
+      </div>
 
       {filteredIdeas.length ? (
         <div className={styles.boardList}>
@@ -112,24 +91,28 @@ export function IdeaBoardSection({
                   </div>
                   <h3 className={styles.boardItemTitle}>{w.title}</h3>
                   <p className={styles.boardSummary}>{w.summary}</p>
-                  {w.tags?.length ? (
-                    <div className={styles.boardTags}>
-                      {w.tags.map((tag) => (
-                        <span key={`${w.id}:tag:${tag}`} className={styles.boardTag}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-                <div className={styles.boardAction}>
-                  <button
-                    type="button"
-                    className={styles.boardButton}
-                    onClick={() => onSelectIdea(w.id)}
-                  >
-                    {status === 'open' ? '去认领' : status === 'in-progress' ? '看进度' : '看成果'}
-                  </button>
+                  <div className={styles.boardFooter}>
+                    {w.tags?.length ? (
+                      <div className={styles.boardTags}>
+                        {w.tags.map((tag) => (
+                          <span key={`${w.id}:tag:${tag}`} className={styles.boardTag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      className={styles.boardButton}
+                      onClick={() => onSelectIdea(w.id)}
+                    >
+                      {status === 'open'
+                        ? '去认领'
+                        : status === 'in-progress'
+                          ? '看进度'
+                          : '看成果'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )
@@ -141,6 +124,6 @@ export function IdeaBoardSection({
           <p>先发布一个点子吧。</p>
         </div>
       )}
-    </section>
+    </div>
   )
 }
