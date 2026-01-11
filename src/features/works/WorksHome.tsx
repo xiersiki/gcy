@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/content/types'
+import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
 import { IdeaBoardSection } from './IdeaBoardSection'
 import { IdeaDetailsModal } from './IdeaDetailsModal'

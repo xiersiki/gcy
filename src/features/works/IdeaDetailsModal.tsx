@@ -3,7 +3,7 @@
 import { Button, Modal, Space, Tag, Typography } from '@arco-design/web-react'
 import { useRouter } from 'next/navigation'
 
-import type { AuthorProfile, WorkIndexItem } from '@/content/types'
+import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
 export type IdeaDetailsModalProps = {
   authors: Record<string, AuthorProfile>

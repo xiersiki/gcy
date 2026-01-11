@@ -161,7 +161,7 @@ async function build() {
 
   const fileLines = []
   fileLines.push(
-    `import type { AuthorProfile, WorkEntry, WorkIndexItem, WorkMeta } from '../content/types'`,
+    `import type { AuthorProfile, WorkEntry, WorkIndexItem, WorkMeta } from '../models/content'`,
   )
   fileLines.push(``)
   fileLines.push(`export const authors: Record<string, AuthorProfile> = ${stableJson(authors)}`)

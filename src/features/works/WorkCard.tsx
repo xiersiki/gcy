@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import type { WorkIndexItem } from '@/content/types'
+import type { WorkIndexItem } from '@/models/content'
 
 import styles from './WorkCard.module.css'
 

@@ -1,4 +1,4 @@
-import type { AuthorProfile, WorkEntry, WorkIndexItem, WorkMeta } from '../content/types'
+import type { AuthorProfile, WorkEntry, WorkIndexItem, WorkMeta } from '../models/content'
 
 export const authors: Record<string, AuthorProfile> = {
   gcy: {

@@ -4,7 +4,7 @@ import { Alert, Button, Input, Modal, Select, Space, Upload } from '@arco-design
 import type { UploadItem } from '@arco-design/web-react/es/Upload'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile } from '@/content/types'
+import type { AuthorProfile } from '@/models/content'
 
 type IdeaFormDraft = {
   authorId: string

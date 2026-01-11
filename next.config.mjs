@@ -9,9 +9,11 @@ const withMDX = createMDX({
   },
 })
 
+const isExport = process.env.NEXT_OUTPUT === 'export'
+
 const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
-  output: 'export',
+  ...(isExport ? { output: 'export' } : {}),
 }
 
 export default withMDX(nextConfig)

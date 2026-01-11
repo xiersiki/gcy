@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@arco-design/web-react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/content/types'
+import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
 import styles from './WorksHome.module.css'
 
