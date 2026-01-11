@@ -5,8 +5,8 @@
 ## 项目概览
 
 - 目标：个人作品集合（Portfolio）站点
-- 技术栈：React + TypeScript + Vite
-- 样式：Less（通过 Vite 内置支持）
+- 技术栈：Next.js（App Router）+ React + TypeScript
+- 内容：YAML（元信息）+ MDX（正文）+ demos（独立交互）
 - 包管理：pnpm（见 package.json 的 packageManager 字段）
 - 质量：ESLint + Prettier
 - 提交规范：Husky + lint-staged + commitlint（Conventional Commits）
@@ -40,7 +40,9 @@ pnpm dev
 - 测试（CI）：`pnpm test:ci`
 - 覆盖率：`pnpm coverage`
 - 构建：`pnpm build`
-- 预览：`pnpm preview`
+- 预览：`pnpm preview`（需先 `pnpm build`）
+- 联调某作品：`pnpm dev:work -- <authorId>/<slug>`
+- 内容校验：`pnpm content:validate`
 
 如果 pnpm 提示某些依赖的 build scripts 被忽略，按需执行：
 
@@ -51,11 +53,16 @@ pnpm approve-builds
 ## 目录约定
 
 ```
+content/               作者/作品内容（YAML + MDX）
+demos/                 每个作品的独立交互 demo（各自依赖）
+scripts/               构建、校验与本地工具脚本
 src/
-  app/                 应用入口与路由/Provider（后续扩展）
-  pages/               页面级模块
-  styles/              全局样式与 less
-  test/                测试初始化与工具
+  app/                 Next.js App Router 页面
+  components/           通用组件（含 demo iframe 容器）
+  features/             页面级模块/复用区块
+  content/              内容类型定义
+  generated/            content:build 生成物
+  test/                 测试初始化与工具
 ```
 
 新增代码优先遵循现有结构与命名方式，避免引入与当前体量不匹配的复杂架构。

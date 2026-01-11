@@ -21,7 +21,9 @@ pnpm dev
 ## 常用脚本
 
 - 开发：`pnpm dev`（会先运行 `content:build` 生成内容索引）
+- 联调某个作品：`pnpm dev:work -- <authorId>/<slug>`（同时启动主站 + 对应 demo）
 - 构建：`pnpm build`（会先运行 `content:build` 再进行 Next.js 构建）
+- 预览构建产物：`pnpm preview`（需先 `pnpm build`）
 - 生产启动：`pnpm start`
 - 类型检查：`pnpm typecheck`
 - ESLint：`pnpm lint` / `pnpm lint:fix`
@@ -29,6 +31,7 @@ pnpm dev
 - 测试：`pnpm test` / `pnpm test:ci` / `pnpm coverage`
 - 内容索引生成：`pnpm content:build`
 - 内容校验：`pnpm content:validate`
+- 构建所有 demos：`pnpm demos:build`
 
 ## 目录结构（约定）
 
@@ -38,10 +41,19 @@ content/
   works/<authorId>/<slug>/
     meta.yml                               作品元信息
     index.mdx                              作品正文（MDX）
+demos/
+  <authorId>/<slug>/                       独立交互 demo（各自依赖与构建）
 scripts/
-  content-build.mjs                        构建期扫描内容并生成索引
+  content/
+    build.mjs                              构建期扫描内容并生成索引
+    validate.mjs                           校验 YAML schema
+  dev/
+    work.mjs                               同时启动主站 + 指定 demo
+  build/
+    assemble-dist.mjs                      聚合主站与 demos 到 dist/
 src/
   app/                                    Next.js App Router 页面
+  components/                              通用组件（含 demo iframe 容器）
   features/                                可复用的展示组件/页面模块
   content/                                 TypeScript 内容类型定义
   generated/                               由 content:build 生成的内容索引（不要手改）

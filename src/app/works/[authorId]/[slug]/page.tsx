@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 
-import { DemoFrame } from '@/components/DemoFrame'
+import { DemoFrame } from '@/components/demo/DemoFrame'
 import { authors, workLoaders, works } from '@/generated/content'
 
 export async function generateStaticParams() {

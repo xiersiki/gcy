@@ -3,7 +3,7 @@
 ## 环境要求
 
 - Node.js 18+（建议 20+）
-- npm 10+
+- pnpm 10+
 
 ## 本地开发
 
@@ -35,10 +35,7 @@ pnpm build
 pnpm preview
 ```
 
-## GitHub Pages 部署路径
+## 产物目录
 
-GitHub Pages 会部署到 `/<repo>/` 子路径，构建时通过 `BASE_PATH` 注入：
-
-```bash
-BASE_PATH="/my-repo/" pnpm build
-```
+- `pnpm build` 会生成 `out/`（Next.js export）并聚合成最终部署目录 `dist/`
+- Cloudflare Pages 输出目录指向 `dist/`

@@ -6,8 +6,9 @@
   "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "pnpm content:build && next dev",
-    "dev:work": "node scripts/dev-work.mjs",
-    "build": "pnpm content:build && next build && pnpm demos:build && node scripts/assemble-dist.mjs",
+    "dev:work": "node scripts/dev/work.mjs",
+    "build": "pnpm content:build && next build && pnpm demos:build && node scripts/build/assemble-dist.mjs",
+    "preview": "node scripts/dev/preview-dist.mjs",
     "start": "next start",
     "typecheck": "pnpm content:build && tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings=0",
@@ -18,8 +19,8 @@
     "test:ci": "vitest run",
     "coverage": "vitest run --coverage",
     "prepare": "husky",
-    "content:build": "node scripts/content-build.mjs",
-    "content:validate": "node scripts/content-validate.mjs",
+    "content:build": "node scripts/content/build.mjs",
+    "content:validate": "node scripts/content/validate.mjs",
     "demos:build": "pnpm -r --filter \"./demos/**\" run build"
   },
   "lint-staged": {
