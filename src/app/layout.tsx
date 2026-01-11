@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-
+import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.scss'
 
 export const metadata = {
@@ -18,7 +18,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   )
 }

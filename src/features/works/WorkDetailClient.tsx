@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Layout, FileText, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { DemoFrame } from '@/components/demo/DemoFrame'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import type { AuthorProfile, WorkMeta } from '@/models/content'
 import styles from './WorkDetailClient.module.scss'
 
@@ -57,9 +58,12 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
           </div>
 
           <div className={styles.headerRight}>
-            <button onClick={() => router.back()} className={styles.closeBtn} aria-label="Close">
-              <X size={24} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <ThemeToggle />
+              <button onClick={() => router.back()} className={styles.closeBtn} aria-label="Close">
+                <X size={24} />
+              </button>
+            </div>
           </div>
         </div>
       </header>

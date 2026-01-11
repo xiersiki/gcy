@@ -1,0 +1,28 @@
+@import '../styles/theme.scss';
+
+.toggle {
+  background: $bg-card;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  @include flex-center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $text-main;
+    background: $glass-bg;
+    border-color: $primary-color;
+    transform: translateY(-1px);
+  }
+
+  svg {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:active svg {
+    transform: scale(0.8) rotate(15deg);
+  }
+}

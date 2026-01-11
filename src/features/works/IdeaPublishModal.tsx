@@ -276,64 +276,18 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
 
       <div className={modalStyles.modalFormItem}>
         <label>Reference Images (Optional, max 6)</label>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-            gap: '0.75rem',
-          }}
-        >
+        <div className={modalStyles.imageGrid}>
           {uploadList.map((it, idx) => (
-            <div
-              key={idx}
-              style={{
-                position: 'relative',
-                aspectRatio: '1',
-                borderRadius: '0.5rem',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <img
-                src={it.url}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                alt=""
-              />
-              <button
-                onClick={() => removeFile(idx)}
-                style={{
-                  position: 'absolute',
-                  top: 2,
-                  right: 2,
-                  background: 'rgba(0,0,0,0.5)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  color: 'white',
-                  cursor: 'pointer',
-                  padding: 2,
-                }}
-              >
-                <X size={12} />
+            <div key={idx} className={modalStyles.imageItem}>
+              <img src={it.url} alt="" />
+              <button onClick={() => removeFile(idx)} className={modalStyles.removeBtn}>
+                <X size={14} />
               </button>
             </div>
           ))}
           {uploadList.length < 6 && (
-            <label
-              style={{
-                aspectRatio: '1',
-                borderRadius: '0.5rem',
-                border: '1px dashed rgba(255,255,255,0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#94a3b8',
-                fontSize: '0.75rem',
-                gap: '0.25rem',
-              }}
-            >
-              <Plus size={20} />
+            <label className={modalStyles.uploadPlaceholder}>
+              <Plus size={24} />
               <span>Upload</span>
               <input
                 type="file"

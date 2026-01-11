@@ -22,15 +22,15 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.25rem 0.25rem 0.25rem 0.875rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: $bg-card;
   border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid $border-color;
 }
 
 .userEmail {
   font-size: 0.75rem;
   font-weight: 600;
-  color: $slate-400;
+  color: $text-secondary;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -38,8 +38,8 @@
 }
 
 .logoutBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: $glass-bg;
+  border: 1px solid $border-color;
   color: $text-main;
   padding: 0.375rem 0.875rem;
   border-radius: 0.5rem;

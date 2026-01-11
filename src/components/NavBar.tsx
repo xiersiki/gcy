@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { AuthButton } from './AuthButton'
+import { ThemeToggle } from './ThemeToggle'
 import styles from './NavBar.module.scss'
 
 export function NavBar() {
@@ -40,6 +41,7 @@ export function NavBar() {
         </nav>
 
         <div className={styles.actions}>
+          <ThemeToggle />
           <AuthButton />
         </div>
       </div>

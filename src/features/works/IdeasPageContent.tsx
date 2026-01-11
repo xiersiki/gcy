@@ -73,10 +73,10 @@ export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
       >
         <div className={styles.sectionHeader}>
           <div>
-            <h2 className={styles.sectionTitle}>Ideas Hub</h2>
+            <h2 className={styles.sectionTitle}>Ideas & Proposals</h2>
             <p className={styles.sectionSubtitle}>
-              Discover creative ideas or post your recruitment needs. Ideas can be claimed and
-              turned into reality.
+              Suggest a component you'd like to see, or claim an existing idea to implement it
+              through a Pull Request.
             </p>
           </div>
           <button
@@ -85,7 +85,7 @@ export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
             onClick={() => setIsCreateOpen(true)}
           >
             <Plus size={18} />
-            Publish Idea
+            Post New Idea
           </button>
         </div>
 

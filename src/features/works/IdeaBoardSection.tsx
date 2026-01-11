@@ -1,5 +1,6 @@
 'use client'
 
+import { GitPullRequest, Layout } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
@@ -44,9 +45,10 @@ export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSect
       {filteredIdeas.length ? (
         <div className={styles.boardList}>
           {filteredIdeas.map((w) => {
-            const authorName = authors[w.authorId]?.name ?? w.authorId
-            const initial = authorName.trim().slice(0, 1).toUpperCase() || 'A'
+            const author = authors[w.authorId]
+            const authorName = author?.name ?? w.authorId
             const status = w.idea?.status ?? 'open'
+
             return (
               <div
                 key={`board:${w.id}`}
@@ -59,61 +61,75 @@ export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSect
                   if (e.key === 'Enter' || e.key === ' ') onSelectIdea(w.id)
                 }}
               >
-                <div className={styles.boardAvatar} aria-hidden="true">
-                  {initial}
-                </div>
-                <div className={styles.boardBody}>
-                  <div className={styles.boardMeta}>
-                    <span className={styles.boardAuthor}>{authorName}</span>
-                    <span className={styles.boardDot}>·</span>
-                    <span className={styles.boardDate}>{w.date}</span>
-                    <span className={styles.boardDot}>·</span>
-                    <span className={styles.boardType}>idea</span>
-                    <span className={styles.boardDot}>·</span>
-                    <span
-                      className={`${styles.boardStatus} ${
-                        status === 'open'
-                          ? styles.boardStatusOpen
-                          : status === 'in-progress'
-                            ? styles.boardStatusProgress
-                            : styles.boardStatusDone
-                      }`}
-                    >
-                      {status === 'open'
-                        ? '可认领'
-                        : status === 'in-progress'
-                          ? '进行中'
-                          : '已实现'}
-                      {status === 'in-progress' && w.idea?.claimedBy
-                        ? ` · ${w.idea.claimedBy}`
-                        : ''}
-                    </span>
+                <div className={styles.boardItemHeader}>
+                  <div className={styles.boardAvatar}>
+                    {author?.avatar ? (
+                      <img src={author.avatar} alt={authorName} />
+                    ) : (
+                      <div className={styles.boardAvatarPlaceholder}>
+                        {authorName.trim().slice(0, 1).toUpperCase() || 'A'}
+                      </div>
+                    )}
                   </div>
+                  <div className={styles.boardItemInfo}>
+                    <span className={styles.boardAuthor}>{authorName}</span>
+                    <span className={styles.boardDate}>{w.date}</span>
+                  </div>
+                  <span
+                    className={`${styles.boardStatus} ${
+                      status === 'open'
+                        ? styles.boardStatusOpen
+                        : status === 'in-progress'
+                          ? styles.boardStatusProgress
+                          : styles.boardStatusDone
+                    }`}
+                  >
+                    {status === 'open'
+                      ? 'Open'
+                      : status === 'in-progress'
+                        ? 'In Progress'
+                        : 'Claimed'}
+                  </span>
+                </div>
+
+                <div className={styles.boardItemContent}>
                   <h3 className={styles.boardItemTitle}>{w.title}</h3>
                   <p className={styles.boardSummary}>{w.summary}</p>
-                  <div className={styles.boardFooter}>
-                    {w.tags?.length ? (
-                      <div className={styles.boardTags}>
-                        {w.tags.map((tag) => (
-                          <span key={`${w.id}:tag:${tag}`} className={styles.boardTag}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <button
-                      type="button"
-                      className={styles.boardButton}
-                      onClick={() => onSelectIdea(w.id)}
-                    >
-                      {status === 'open'
-                        ? '去认领'
-                        : status === 'in-progress'
-                          ? '看进度'
-                          : '看成果'}
-                    </button>
-                  </div>
                 </div>
+
+                {status === 'in-progress' && w.idea?.claimedBy && (
+                  <div className={styles.boardClaimedBy}>
+                    <div className={styles.dot} />
+                    <span>Claimed by</span>
+                    <span className={styles.handle}>@{w.idea.claimedBy}</span>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className={styles.boardButton}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onSelectIdea(w.id)
+                  }}
+                >
+                  {status === 'open' ? (
+                    <>
+                      <GitPullRequest />
+                      <span>Accept & Start Dev</span>
+                    </>
+                  ) : status === 'in-progress' ? (
+                    <>
+                      <Layout />
+                      <span>Check Progress</span>
+                    </>
+                  ) : (
+                    <>
+                      <Layout />
+                      <span>View Results</span>
+                    </>
+                  )}
+                </button>
               </div>
             )
           })}

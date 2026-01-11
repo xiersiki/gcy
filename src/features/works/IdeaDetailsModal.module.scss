@@ -1,0 +1,88 @@
+@import '../../styles/theme.scss';
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: $text-muted;
+  font-size: 0.8125rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.statusBadge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+
+  &.open {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.2);
+  }
+
+  &.inProgress {
+    background: rgba(79, 70, 229, 0.1);
+    color: $primary-hover;
+    border-color: rgba(79, 70, 229, 0.2);
+  }
+
+  &.completed {
+    background: $bg-dark;
+    color: $text-muted;
+    border-color: $border-color;
+  }
+}
+
+.summary {
+  font-size: 0.9375rem;
+  color: $text-secondary;
+  line-height: 1.6;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tagBtn {
+  background: $bg-dark;
+  border: 1px solid $border-color;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  color: $text-muted;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $glass-bg;
+    color: $text-main;
+    border-color: $primary-color;
+  }
+}
+
+.claimedBox {
+  padding: 1rem;
+  background: $bg-dark;
+  border-radius: 0.75rem;
+  border: 1px solid $border-color;
+  font-size: 0.875rem;
+
+  .label {
+    color: $text-muted;
+  }
+
+  .value {
+    color: $primary-hover;
+    font-weight: 600;
+  }
+}

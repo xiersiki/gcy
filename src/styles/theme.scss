@@ -1,13 +1,13 @@
-// Colors
-$bg-dark: #020617; // Deeper blue-black
-$bg-card: rgba(30, 41, 59, 0.4);
-$border-color: rgba(51, 65, 85, 0.5);
-$primary-color: #4f46e5;
-$primary-hover: #6366f1;
+// Colors (Mapped to CSS Variables in globals.scss)
+$bg-dark: var(--bg-dark);
+$bg-card: var(--bg-card);
+$border-color: var(--border-color);
+$primary-color: var(--primary);
+$primary-hover: var(--primary-hover);
 $secondary-color: #10b981;
-$text-main: #f8fafc;
-$text-secondary: #94a3b8;
-$text-muted: #64748b;
+$text-main: var(--text-main);
+$text-secondary: var(--text-secondary);
+$text-muted: var(--text-muted);
 
 // Gradients
 $grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -19,7 +19,7 @@ $container-max-width: 80rem;
 $nav-height: 4rem;
 
 // Slate Colors
-$slate-400: #94a3b8;
+$slate-400: var(--slate-400);
 $slate-500: #64748b;
 $slate-600: #475569;
 $slate-700: #334155;
@@ -27,7 +27,7 @@ $slate-800: #1e293b;
 $slate-900: #0f172a;
 
 // Effects
-$glass-bg: rgba(2, 6, 23, 0.8);
+$glass-bg: var(--glass-bg);
 $glass-blur: blur(16px);
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 $shadow-md:
@@ -61,10 +61,10 @@ $shadow-xl:
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    border-color: rgba(99, 102, 241, 0.4);
-    background: rgba(30, 41, 59, 0.6);
+    border-color: $primary-color;
+    background: $glass-bg;
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    box-shadow: $shadow-xl;
   }
 }
 

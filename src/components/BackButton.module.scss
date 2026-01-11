@@ -18,18 +18,18 @@
     width: 2rem;
     height: 2rem;
     border-radius: 0.625rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: $bg-card;
+    border: 1px solid $border-color;
     @include flex-center;
     transition: all 0.2s;
   }
 
   &:hover {
-    color: white;
+    color: $text-main;
 
     .iconWrapper {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.1);
+      background: $glass-bg;
+      border-color: $primary-color;
       transform: translateX(-4px);
     }
   }

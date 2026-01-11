@@ -92,7 +92,7 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
     >
       <div className={modalStyles.modalFormItem}>
         <label>Implementation Author</label>
-        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+        <p className={modalStyles.modalHelpText}>
           The project will be created under this author's directory.
         </p>
         <select

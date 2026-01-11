@@ -11,12 +11,12 @@
 .loginCard {
   width: 100%;
   max-width: 440px;
-  background: rgba(30, 41, 59, 0.4);
+  background: $bg-card;
   backdrop-filter: blur(16px);
   border: 1px solid $border-color;
   padding: 2.5rem;
   border-radius: 2rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: $shadow-xl;
 }
 
 .header {
@@ -40,7 +40,7 @@
 
 .title {
   font-size: 1.875rem;
-  color: white;
+  color: $text-main;
   margin-bottom: 0.5rem;
 }
 
@@ -53,7 +53,7 @@
   width: 100%;
   background: $bg-dark;
   border: 1px solid $border-color;
-  color: white;
+  color: $text-main;
   padding: 0.75rem;
   border-radius: 0.75rem;
   font-weight: 700;
@@ -66,8 +66,8 @@
   margin-bottom: 1.5rem;
 
   &:hover {
-    background: #1e293b;
-    border-color: $text-secondary;
+    background: $glass-bg;
+    border-color: $primary-color;
   }
 }
 
@@ -88,7 +88,7 @@
 
   span {
     position: relative;
-    background: #111927; // Match card bg approximately
+    background: $bg-dark;
     padding: 0 0.75rem;
     font-size: 0.75rem;
     color: $text-muted;
@@ -115,9 +115,9 @@
 
 .input {
   width: 100%;
-  background: rgba(15, 23, 42, 0.5);
+  background: $bg-dark;
   border: 1px solid $border-color;
-  color: white;
+  color: $text-main;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   font-size: 1rem;

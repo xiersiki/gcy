@@ -15,27 +15,26 @@
   pointer-events: none;
   z-index: -1;
   overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, rgba(31, 41, 55, 0.2) 0%, transparent 70%);
 
   .blob1 {
     position: absolute;
     top: -10%;
     left: -10%;
-    width: 40%;
-    height: 60%;
-    background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
-    filter: blur(80px);
-    animation: pulse 10s infinite alternate;
+    width: 60%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+    filter: blur(100px);
   }
 
   .blob2 {
     position: absolute;
     top: 20%;
-    right: -5%;
-    width: 35%;
-    height: 50%;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.1) 0%, transparent 70%);
-    filter: blur(80px);
-    animation: pulse 12s infinite alternate-reverse;
+    right: -10%;
+    width: 50%;
+    height: 70%;
+    background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, transparent 70%);
+    filter: blur(100px);
   }
 }
 
@@ -69,7 +68,7 @@
   border-radius: 9999px;
   background: rgba(79, 70, 229, 0.1);
   border: 1px solid rgba(79, 70, 229, 0.2);
-  color: #a5b4fc;
+  color: $primary-hover;
   font-size: 0.75rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
@@ -81,7 +80,7 @@
 .title {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 900;
-  color: white;
+  color: $text-main;
   margin-bottom: 1.5rem;
   line-height: 1.1;
   max-width: 900px;
@@ -90,7 +89,7 @@
 
 .subtitle {
   font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
-  color: $slate-400;
+  color: $text-secondary;
   max-width: 40rem;
   margin-bottom: 2.5rem;
   line-height: 1.6;
@@ -128,9 +127,9 @@
 }
 
 .secondaryBtn {
-  background: rgba(30, 41, 59, 0.5);
+  background: $bg-card;
   border: 1px solid $border-color;
-  color: white;
+  color: $text-main;
   padding: 1rem 2.5rem;
   border-radius: 1rem;
   font-weight: 700;
@@ -139,8 +138,8 @@
   backdrop-filter: blur(8px);
 
   &:hover {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: $text-secondary;
+    background: $bg-card;
+    border-color: $primary-color;
     transform: translateY(-2px);
   }
 }
@@ -161,23 +160,23 @@
 .sectionTitle {
   font-size: 1.875rem;
   font-weight: 800;
-  color: white;
+  color: $text-main;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .sectionSubtitle {
   font-size: 0.9375rem;
-  color: $slate-400;
+  color: $text-secondary;
   max-width: 30rem;
 }
 
 .filterBar {
   margin-bottom: 2rem;
   padding: 0.25rem;
-  background: rgba(30, 41, 59, 0.3);
+  background: $bg-card;
   border-radius: 0.875rem;
-  border: 1px solid rgba(51, 65, 85, 0.3);
+  border: 1px solid $border-color;
   display: inline-flex;
 }
 
@@ -190,7 +189,7 @@
 .chip {
   background: transparent;
   border: none;
-  color: $slate-400;
+  color: $text-secondary;
   padding: 0.5rem 1rem;
   border-radius: 0.625rem;
   font-size: 0.8125rem;
@@ -199,13 +198,14 @@
   transition: all 0.2s;
 
   &:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.05);
+    color: $text-main;
+    background: $glass-bg;
   }
 
   &.chipActive {
-    background: rgba(129, 140, 248, 0.1);
-    color: #818cf8;
+    background: $glass-bg;
+    color: $primary-hover;
+    border: 1px solid $border-color;
   }
 }
 
@@ -226,14 +226,14 @@
 .empty {
   text-align: center;
   padding: 6rem 2rem;
-  background: rgba(30, 41, 59, 0.1);
+  background: $bg-card;
   border-radius: 2rem;
-  border: 2px dashed rgba(51, 65, 85, 0.2);
+  border: 2px dashed $border-color;
 
   h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: white;
+    color: $text-main;
   }
 
   p {

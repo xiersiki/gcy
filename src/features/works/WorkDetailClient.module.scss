@@ -31,7 +31,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 800;
-  color: white;
+  color: $text-main;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -76,15 +76,15 @@
   justify-content: center;
 
   &:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.05);
+    color: $text-main;
+    background: $glass-bg;
   }
 }
 
 .tabs {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: $bg-card;
   padding: 0.25rem;
   border-radius: 0.75rem;
   border: 1px solid $border-color;
@@ -105,12 +105,13 @@
   transition: all 0.2s;
 
   &:hover {
-    color: white;
+    color: $text-main;
   }
 
   &.active {
-    color: white;
-    background: rgba(255, 255, 255, 0.08);
+    color: $text-main;
+    background: $glass-bg;
+    box-shadow: $shadow-sm;
   }
 }
 
@@ -132,7 +133,7 @@
   background: #ffffff;
   border-radius: 1.5rem;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: $shadow-xl;
   display: flex;
   flex-direction: column;
 }
@@ -152,7 +153,7 @@
   h1,
   h2,
   h3 {
-    color: white;
+    color: $text-main;
     margin-top: 2.5rem;
     margin-bottom: 1rem;
   }
@@ -162,9 +163,10 @@
   }
 
   code {
-    background: rgba(255, 255, 255, 0.05);
+    background: $bg-card;
+    border: 1px solid $border-color;
     padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
+    border-radius: 0.4rem;
     font-size: 0.9em;
     font-family: 'JetBrains Mono', monospace;
   }
@@ -179,7 +181,9 @@
 
     code {
       background: transparent;
+      border: none;
       padding: 0;
+      color: #e2e8f0;
     }
   }
 }

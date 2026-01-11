@@ -1,8 +1,29 @@
 @import '../styles/theme.scss';
 
 :root {
-  --bg-dark: #{$bg-dark};
-  --primary: #{$primary-color};
+  --bg-dark: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --border-color: rgba(226, 232, 240, 0.8);
+  --primary: #4f46e5;
+  --primary-hover: #6366f1;
+  --text-main: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --slate-400: #94a3b8;
+}
+
+[data-theme='dark'] {
+  --bg-dark: #0b1121;
+  --bg-card: #111827;
+  --border-color: #1f2937;
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --text-main: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --glass-bg: rgba(17, 24, 39, 0.8);
+  --slate-400: #94a3b8;
 }
 
 * {
@@ -19,11 +40,14 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
-  background-color: $bg-dark;
-  color: $text-main;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 a {
@@ -44,16 +68,16 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: var(--bg-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--border-color);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--text-muted);
 }
 
 // Typography
