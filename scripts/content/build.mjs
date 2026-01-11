@@ -36,6 +36,22 @@ const WorkDemoSchema = z
   })
   .strict()
 
+const IdeaStatusSchema = z.enum(['open', 'in-progress', 'done'])
+
+const IdeaMetaSchema = z
+  .object({
+    status: IdeaStatusSchema.optional(),
+    claimedBy: z.string().min(1).optional(),
+    claimedAt: z.string().min(1).optional(),
+    claimPrUrl: z.string().min(1).optional(),
+    implementedWorkId: z.string().min(1).optional(),
+    implementedPrUrl: z.string().min(1).optional(),
+    branch: z.string().min(1).optional(),
+    compareUrl: z.string().min(1).optional(),
+    pending: z.boolean().optional(),
+  })
+  .strict()
+
 const WorkMetaSchema = z
   .object({
     title: z.string().min(1),
@@ -47,6 +63,8 @@ const WorkMetaSchema = z
     cover: z.string().optional(),
     draft: z.boolean().optional(),
     demo: WorkDemoSchema.optional(),
+    idea: IdeaMetaSchema.optional(),
+    sourceIdeaId: z.string().min(1).optional(),
     external: z
       .object({
         demoUrl: z.string().optional(),
@@ -202,7 +220,7 @@ async function build() {
   fileLines.push(`}, {} as Record<string, string[]>)`)
   fileLines.push(``)
   fileLines.push(
-    `export const categories = Array.from(new Set(worksList.map((w) => w.category).filter((c): c is string => Boolean(c)))).sort()`,
+    `export const categories = Array.from(new Set(worksList.filter((w) => w.type !== 'idea' && !w.draft).map((w) => w.category).filter((c): c is string => Boolean(c)))).sort()`,
   )
   fileLines.push(``)
 

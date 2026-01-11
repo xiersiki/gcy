@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { AuthButton } from './AuthButton'
 import styles from './NavBar.module.css'
 
 export function NavBar() {
@@ -17,6 +18,7 @@ export function NavBar() {
           <Link href="/authors" className={styles.navLink}>
             Authors
           </Link>
+          <AuthButton />
         </nav>
       </div>
     </header>

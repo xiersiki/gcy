@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 
 import { DemoFrame } from '@/components/demo/DemoFrame'
 import { authors, workLoaders, works } from '@/generated/content'
@@ -47,6 +48,16 @@ export default async function WorkPage({
         <div>
           <span>{work.meta.date}</span>
           {author ? <span>{` · ${author.name}`}</span> : null}
+          {work.meta.sourceIdeaId ? (
+            <span>
+              {` · 来源：`}
+              <Link
+                href={`/works/${work.meta.sourceIdeaId.split('/')[0]}/${work.meta.sourceIdeaId.split('/')[1]}`}
+              >
+                {work.meta.sourceIdeaId}
+              </Link>
+            </span>
+          ) : null}
         </div>
       </header>
 

@@ -4,7 +4,7 @@ import { Alert, Button, Input, Modal, Select, Space, Upload } from '@arco-design
 import type { UploadItem } from '@arco-design/web-react/es/Upload'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile } from '@/models/content'
+import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
 type IdeaFormDraft = {
   authorId: string
@@ -17,13 +17,14 @@ type IdeaFormDraft = {
 type SubmitState =
   | { status: 'idle' }
   | { status: 'submitting' }
-  | { status: 'success'; prUrl: string }
+  | { status: 'success'; idea: WorkIndexItem }
   | { status: 'error'; message: string }
 
 export type IdeaPublishModalProps = {
   authors: Record<string, AuthorProfile>
   open: boolean
   onClose: () => void
+  onPublished?: (idea: WorkIndexItem) => void
 }
 
 function slugifyTitle(title: string) {
@@ -54,11 +55,10 @@ function validateDraft(draft: IdeaFormDraft) {
     .slice(0, 12)
 
   const slug = slugifyTitle(title)
-  const branch = `ideas/${authorId}/${slug}`
 
   return {
     ok: true as const,
-    branch,
+    slug,
     payload: {
       authorId,
       title,
@@ -69,7 +69,7 @@ function validateDraft(draft: IdeaFormDraft) {
   }
 }
 
-export function IdeaPublishModal({ authors, open, onClose }: IdeaPublishModalProps) {
+export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPublishModalProps) {
   const authorIds = useMemo(
     () => Object.keys(authors).sort((a, b) => a.localeCompare(b)),
     [authors],
@@ -141,13 +141,56 @@ export function IdeaPublishModal({ authors, open, onClose }: IdeaPublishModalPro
 
       if (!res.ok) {
         const raw = await res.text().catch(() => '')
+        try {
+          const parsed = JSON.parse(raw) as { ok?: boolean; error?: { message?: string } }
+          if (parsed?.ok === false && parsed.error?.message) throw new Error(parsed.error.message)
+        } catch (e) {
+          void e
+        }
         const detail = raw ? `：${raw.slice(0, 240)}` : ''
         throw new Error(`提交失败（${res.status}）${detail}`)
       }
-      const data = (await res.json().catch(() => null)) as null | { prUrl?: string }
-      const prUrl = data?.prUrl
-      if (!prUrl) throw new Error('提交成功但缺少 prUrl 返回值')
-      setSubmitState({ status: 'success', prUrl })
+      const data = (await res.json().catch(() => null)) as null | {
+        ok?: boolean
+        data?: {
+          authorId: string
+          slug: string
+          title: string
+          summary: string
+          tags?: string[]
+          status?: string
+          createdAt?: string
+          claimedBy?: string | null
+          claimPrUrl?: string | null
+          imageUrls?: string[]
+        }
+      }
+      const dto = data?.data
+      if (!data?.ok || !dto) throw new Error('提交成功但缺少 data 返回值')
+      const validated2 = validateDraft(draft)
+      if (!validated2.ok) throw new Error('提交成功但校验失败')
+      const status =
+        dto.status === 'in-progress' || dto.status === 'done' || dto.status === 'open'
+          ? dto.status
+          : 'open'
+      const idea: WorkIndexItem = {
+        id: `${dto.authorId}/${dto.slug}`,
+        authorId: dto.authorId,
+        slug: dto.slug,
+        title: dto.title,
+        summary: dto.summary,
+        type: 'idea',
+        date: (dto.createdAt || new Date().toISOString()).slice(0, 10),
+        tags: dto.tags ?? validated2.payload.tags,
+        idea: {
+          status,
+          claimedBy: dto.claimedBy ?? undefined,
+          claimPrUrl: dto.claimPrUrl ?? undefined,
+          pending: false,
+        },
+      }
+      setSubmitState({ status: 'success', idea })
+      onPublished?.(idea)
     } catch (err) {
       const message = err instanceof Error ? err.message : '提交失败'
       setSubmitState({ status: 'error', message })
@@ -170,13 +213,16 @@ export function IdeaPublishModal({ authors, open, onClose }: IdeaPublishModalPro
                 setCheckResult(null)
                 return
               }
-              setCheckResult({ ok: true, branch: validated.branch })
+              setCheckResult({
+                ok: true,
+                branch: `content/works/${validated.payload.authorId}/${validated.slug}`,
+              })
             }}
           >
             校验
           </Button>
           <Button type="primary" loading={submitState.status === 'submitting'} onClick={submit}>
-            {submitState.status === 'submitting' ? '提交中…' : '提交并创建 PR'}
+            {submitState.status === 'submitting' ? '提交中…' : '提交'}
           </Button>
           <Button onClick={onClose}>关闭</Button>
         </Space>
@@ -306,14 +352,7 @@ export function IdeaPublishModal({ authors, open, onClose }: IdeaPublishModalPro
         {submitState.status === 'success' ? (
           <Alert
             type="success"
-            content={
-              <span>
-                已创建 PR：{' '}
-                <a href={submitState.prUrl} target="_blank" rel="noreferrer">
-                  {submitState.prUrl}
-                </a>
-              </span>
-            }
+            content={<span>已发布到社区（登录用户可见，认领时才会创建 PR）</span>}
           />
         ) : null}
       </Space>

@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { Button } from '@arco-design/web-react'
+import { useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 
@@ -20,6 +20,13 @@ export function IdeaBoardSection({
   onSelectIdea,
   onOpenPublish,
 }: IdeaBoardSectionProps) {
+  const [activeStatus, setActiveStatus] = useState<'All' | 'open' | 'in-progress' | 'done'>('All')
+
+  const filteredIdeas = useMemo(() => {
+    if (activeStatus === 'All') return ideas
+    return ideas.filter((w) => (w.idea?.status ?? 'open') === activeStatus)
+  }, [activeStatus, ideas])
+
   return (
     <section className={styles.boardSection}>
       <header className={styles.boardHeader}>
@@ -35,14 +42,32 @@ export function IdeaBoardSection({
           </Button>
         </div>
         <p className={styles.boardSubtitle}>发布点子并附上参考图，方便后来者对齐目标效果。</p>
+        <div className={styles.boardFilters}>
+          {(['All', 'open', 'in-progress', 'done'] as const).map((key) => (
+            <button
+              key={`idea-filter:${key}`}
+              type="button"
+              onClick={() => setActiveStatus(key)}
+              className={`${styles.chip} ${activeStatus === key ? styles.chipActive : ''}`}
+            >
+              {key === 'All'
+                ? '全部'
+                : key === 'open'
+                  ? '可认领'
+                  : key === 'in-progress'
+                    ? '进行中'
+                    : '已实现'}
+            </button>
+          ))}
+        </div>
       </header>
 
-      {ideas.length ? (
+      {filteredIdeas.length ? (
         <div className={styles.boardList}>
-          {ideas.map((w) => {
+          {filteredIdeas.map((w) => {
             const authorName = authors[w.authorId]?.name ?? w.authorId
-            const href = `/works/${w.authorId}/${w.slug}`
             const initial = authorName.trim().slice(0, 1).toUpperCase() || 'A'
+            const status = w.idea?.status ?? 'open'
             return (
               <div
                 key={`board:${w.id}`}
@@ -60,47 +85,51 @@ export function IdeaBoardSection({
                 </div>
                 <div className={styles.boardBody}>
                   <div className={styles.boardMeta}>
-                    <Link
-                      href={`/authors/${w.authorId}`}
-                      className={styles.boardAuthor}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {authorName}
-                    </Link>
+                    <span className={styles.boardAuthor}>{authorName}</span>
                     <span className={styles.boardDot}>·</span>
                     <span className={styles.boardDate}>{w.date}</span>
                     <span className={styles.boardDot}>·</span>
                     <span className={styles.boardType}>idea</span>
+                    <span className={styles.boardDot}>·</span>
+                    <span
+                      className={`${styles.boardStatus} ${
+                        status === 'open'
+                          ? styles.boardStatusOpen
+                          : status === 'in-progress'
+                            ? styles.boardStatusProgress
+                            : styles.boardStatusDone
+                      }`}
+                    >
+                      {status === 'open'
+                        ? '可认领'
+                        : status === 'in-progress'
+                          ? '进行中'
+                          : '已实现'}
+                      {status === 'in-progress' && w.idea?.claimedBy
+                        ? ` · ${w.idea.claimedBy}`
+                        : ''}
+                    </span>
                   </div>
-                  <h3 className={styles.boardItemTitle}>
-                    <Link href={href} onClick={(e) => e.stopPropagation()}>
-                      {w.title}
-                    </Link>
-                  </h3>
+                  <h3 className={styles.boardItemTitle}>{w.title}</h3>
                   <p className={styles.boardSummary}>{w.summary}</p>
                   {w.tags?.length ? (
                     <div className={styles.boardTags}>
                       {w.tags.map((tag) => (
-                        <Link
-                          key={`${w.id}:tag:${tag}`}
-                          href={`/tags/${tag}`}
-                          className={styles.boardTag}
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <span key={`${w.id}:tag:${tag}`} className={styles.boardTag}>
                           {tag}
-                        </Link>
+                        </span>
                       ))}
                     </div>
                   ) : null}
                 </div>
                 <div className={styles.boardAction}>
-                  <Link
-                    href={href}
+                  <button
+                    type="button"
                     className={styles.boardButton}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={() => onSelectIdea(w.id)}
                   >
-                    去认领
-                  </Link>
+                    {status === 'open' ? '去认领' : status === 'in-progress' ? '看进度' : '看成果'}
+                  </button>
                 </div>
               </div>
             )

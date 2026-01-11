@@ -62,22 +62,19 @@ async function readPayloadAndImages(
   return { payload, images: [] }
 }
 
-function buildMetaYaml(p: Payload, authorId: string, slug: string) {
+function buildMetaYaml(p: Payload) {
   const tags = (p.tags ?? []).filter((t) => t && t.trim()).slice(0, 12)
   const lines = []
   lines.push(`title: ${p.title}`)
   lines.push(`summary: ${p.summary}`)
   lines.push(`type: idea`)
   lines.push(`date: ${toIsoDate()}`)
+  lines.push(`idea:`)
+  lines.push(`  status: open`)
   if (tags.length) {
     lines.push(`tags:`)
     for (const t of tags) lines.push(`  - ${t}`)
   }
-  lines.push(`demo:`)
-  lines.push(`  kind: iframe`)
-  lines.push(`  src: /demos/${authorId}/${slug}/`)
-  lines.push(`  devSrc: http://localhost:5173/`)
-  lines.push(`  height: 720`)
   return `${lines.join('\n')}\n`
 }
 
@@ -97,55 +94,6 @@ function buildIndexMdx(p: Payload, authorId: string, slug: string, imageNames: s
   }
   return `${lines.join('\n')}\n`
 }
-
-function demoPackageJson(authorId: string, slug: string) {
-  return JSON.stringify(
-    {
-      name: `@demo/${authorId}-${slug}`,
-      private: true,
-      version: '0.0.0',
-      type: 'module',
-      scripts: {
-        dev: 'vite --port 5173 --strictPort',
-        build: 'vite build',
-        preview: 'vite preview --port 4173',
-      },
-      dependencies: {
-        react: '^19.2.0',
-        'react-dom': '^19.2.0',
-      },
-      devDependencies: {
-        vite: '^5.4.21',
-      },
-    },
-    null,
-    2,
-  )
-}
-
-function demoViteConfig() {
-  return `import { defineConfig } from 'vite'\n\nexport default defineConfig({\n  base: './',\n})\n`
-}
-
-function demoIndexHtml(title: string) {
-  return [
-    '<!doctype html>',
-    '<html lang="zh-CN">',
-    '  <head>',
-    '    <meta charset="UTF-8" />',
-    '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-    `    <title>${title}</title>`,
-    '  </head>',
-    '  <body>',
-    '    <div id="root"></div>',
-    '    <script type="module" src="/src/main.jsx"></script>',
-    '  </body>',
-    '</html>',
-    '',
-  ].join('\n')
-}
-
-// removed: legacy vanilla demoMainJs
 
 async function gh(url: string, init: RequestInit, token: string) {
   const r = await fetch(`https://api.github.com${url}`, {
@@ -175,8 +123,8 @@ export const onRequestPost = async ({
     const token = e.GITHUB_TOKEN || process.env.GITHUB_TOKEN || ''
     if (!owner || !repo || !token) {
       const branchPreview = `ideas/${ensureSafeId(payload.authorId)}/${slugifyTitle(payload.title)}`
-      const compare = `https://github.com/${owner || 'owner'}/${repo || 'repo'}/compare/${branchPreview}?expand=1`
-      return new Response(JSON.stringify({ prUrl: compare }), {
+      const compareUrl = `https://github.com/${owner || 'owner'}/${repo || 'repo'}/compare/main...${branchPreview}?expand=1`
+      return new Response(JSON.stringify({ branch: branchPreview, compareUrl }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
       })
@@ -241,7 +189,7 @@ export const onRequestPost = async ({
       })
     }
 
-    const meta = buildMetaYaml(payload, authorId, slug)
+    const meta = buildMetaYaml(payload)
     const mdx = buildIndexMdx(
       payload,
       authorId,
@@ -265,96 +213,6 @@ export const onRequestPost = async ({
           content: mdx,
         },
         ...imageEntries,
-        {
-          path: `demos/${authorId}/${slug}/package.json`,
-          mode: '100644',
-          type: 'blob',
-          content: demoPackageJson(authorId, slug),
-        },
-        {
-          path: `demos/${authorId}/${slug}/vite.config.js`,
-          mode: '100644',
-          type: 'blob',
-          content: demoViteConfig(),
-        },
-        {
-          path: `demos/${authorId}/${slug}/index.html`,
-          mode: '100644',
-          type: 'blob',
-          content: demoIndexHtml(payload.title),
-        },
-        {
-          path: `demos/${authorId}/${slug}/src/main.jsx`,
-          mode: '100644',
-          type: 'blob',
-          content: [
-            "import React from 'react'",
-            "import { createRoot } from 'react-dom/client'",
-            "import App from './App.jsx'",
-            '',
-            'function postResize() {',
-            '  const height = Math.max(',
-            '    document.documentElement.scrollHeight,',
-            '    document.body?.scrollHeight ?? 0,',
-            '    document.documentElement.offsetHeight,',
-            '    document.body?.offsetHeight ?? 0,',
-            '  )',
-            "  let targetOrigin = '*'",
-            '  try {',
-            '    if (document.referrer) targetOrigin = new URL(document.referrer).origin',
-            '  } catch {}',
-            "  window.parent?.postMessage({ type: 'demo:resize', height }, targetOrigin)",
-            '}',
-            '',
-            "const rootEl = document.getElementById('root')",
-            'const root = createRoot(rootEl)',
-            'root.render(<App onChange={() => postResize()} />)',
-            '',
-            'window.addEventListener("load", postResize)',
-            'window.addEventListener("resize", postResize)',
-            '',
-          ].join('\n'),
-        },
-        {
-          path: `demos/${authorId}/${slug}/src/App.jsx`,
-          mode: '100644',
-          type: 'blob',
-          content: [
-            "import React, { useEffect, useState } from 'react'",
-            '',
-            'export default function App({ onChange }) {',
-            '  const [count, setCount] = useState(0)',
-            '  const [boxHeight, setBoxHeight] = useState(180)',
-            '  useEffect(() => {',
-            '    if (typeof onChange === "function") onChange()',
-            '  }, [count, boxHeight, onChange])',
-            '',
-            '  return (',
-            '    <div style={{ padding: 16, fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" }}>',
-            '      <div style={{ border: "1px solid rgba(0,0,0,.12)", borderRadius: 12, padding: 16, maxWidth: 720, margin: "0 auto" }}>',
-            '        <h1 style={{ fontSize: 18, margin: "0 0 12px" }}>React Demo（独立包 + iframe 隔离）</h1>',
-            '        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>',
-            '          <button type="button" onClick={() => setCount((v) => v - 1)} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,.2)", background: "transparent", cursor: "pointer" }}>-1</button>',
-            '          <div style={{ fontVariantNumeric: "tabular-nums", fontSize: 24 }}>{count}</div>',
-            '          <button type="button" onClick={() => setCount((v) => v + 1)} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(0,0,0,.2)", background: "transparent", cursor: "pointer" }}>+1</button>',
-            '        </div>',
-            '        <div style={{ height: 12 }} />',
-            '        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>',
-            '          <label htmlFor="range">渐变块高度</label>',
-            '          <input id="range" type="range" min="120" max="520" value={boxHeight} onChange={(e) => setBoxHeight(Number(e.target.value))} />',
-            '          <span style={{ opacity: 0.72, fontSize: 12 }}>{boxHeight}px</span>',
-            '        </div>',
-            '        <div style={{ height: 12 }} />',
-            '        <div style={{ height: boxHeight, width: "100%", borderRadius: 12, background: "linear-gradient(135deg, #7c3aed, #06b6d4)" }} />',
-            '        <div style={{ height: 12 }} />',
-            '        <div style={{ opacity: 0.72, fontSize: 12 }}>这个 demo 会向父页面 postMessage 高度用于自适应。</div>',
-            '      </div>',
-            '    </div>',
-            '  )',
-            '}',
-            '',
-          ].join('\n'),
-        },
       ],
     }
 
@@ -401,30 +259,23 @@ export const onRequestPost = async ({
     )
     if (!refCreateRes.ok) {
       const raw = await refCreateRes.text().catch(() => '')
-      throw new Error(`创建分支失败：${refCreateRes.status} ${raw.slice(0, 200)}`)
+      if (refCreateRes.status === 422 && raw.includes('Reference already exists')) {
+        const updateRes = await gh(
+          `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
+          { method: 'PATCH', body: JSON.stringify({ sha: newCommitData.sha, force: true }) },
+          token,
+        )
+        if (!updateRes.ok) {
+          const updateRaw = await updateRes.text().catch(() => '')
+          throw new Error(`更新分支失败：${updateRes.status} ${updateRaw.slice(0, 200)}`)
+        }
+      } else {
+        throw new Error(`创建分支失败：${refCreateRes.status} ${raw.slice(0, 200)}`)
+      }
     }
 
-    const prRes = await gh(
-      `/repos/${owner}/${repo}/pulls`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          title: `${payload.title}`,
-          head: branch,
-          base,
-          body:
-            payload.details && payload.details.trim() ? payload.details.trim() : payload.summary,
-        }),
-      },
-      token,
-    )
-    if (!prRes.ok) {
-      const raw = await prRes.text().catch(() => '')
-      throw new Error(`创建 PR 失败：${prRes.status} ${raw.slice(0, 200)}`)
-    }
-    const prData = (await prRes.json()) as { html_url: string }
-
-    return new Response(JSON.stringify({ prUrl: prData.html_url }), {
+    const compareUrl = `https://github.com/${owner}/${repo}/compare/${base}...${branch}?expand=1`
+    return new Response(JSON.stringify({ branch, compareUrl }), {
       status: 200,
       headers: { 'content-type': 'application/json' },
     })

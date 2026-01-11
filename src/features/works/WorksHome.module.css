@@ -112,6 +112,14 @@
   line-height: 1.75;
 }
 
+.boardFilters {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
 .boardList {
   display: flex;
   flex-direction: column;
@@ -189,6 +197,23 @@
   text-transform: uppercase;
 }
 
+.boardStatus {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.boardStatusOpen {
+  color: #16a34a;
+}
+
+.boardStatusProgress {
+  color: #d97706;
+}
+
+.boardStatusDone {
+  color: #6b7280;
+}
+
 .boardItemTitle {
   margin: 0;
   font-size: 1.125rem;
@@ -234,6 +259,8 @@
   font-weight: 900;
   font-size: 0.875rem;
   white-space: nowrap;
+  border: none;
+  cursor: pointer;
 }
 
 .boardEmpty {

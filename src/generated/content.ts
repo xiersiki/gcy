@@ -71,5 +71,10 @@ export const tagsIndex = worksList.reduce(
 )
 
 export const categories = Array.from(
-  new Set(worksList.map((w) => w.category).filter((c): c is string => Boolean(c))),
+  new Set(
+    worksList
+      .filter((w) => w.type !== 'idea' && !w.draft)
+      .map((w) => w.category)
+      .filter((c): c is string => Boolean(c)),
+  ),
 ).sort()

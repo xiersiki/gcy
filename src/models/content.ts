@@ -17,6 +17,20 @@ export type WorkDemo = {
   height?: number
 }
 
+export type IdeaStatus = 'open' | 'in-progress' | 'done'
+
+export type IdeaMeta = {
+  status?: IdeaStatus
+  claimedBy?: string
+  claimedAt?: string
+  claimPrUrl?: string
+  implementedWorkId?: string
+  implementedPrUrl?: string
+  branch?: string
+  compareUrl?: string
+  pending?: boolean
+}
+
 export type WorkMeta = {
   title: string
   summary: string
@@ -27,6 +41,8 @@ export type WorkMeta = {
   cover?: string
   draft?: boolean
   demo?: WorkDemo
+  idea?: IdeaMeta
+  sourceIdeaId?: string
   external?: {
     demoUrl?: string
     repoUrl?: string

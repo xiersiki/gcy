@@ -245,3 +245,5 @@ output_resource
 
 # Local agent rule files
 WARP.md
+
+.trae/*
