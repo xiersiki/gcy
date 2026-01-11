@@ -1,0 +1,11 @@
+title: 测试
+summary: 测试
+type: idea
+date: 2026-01-11
+tags:
+  - 测试
+demo:
+  kind: iframe
+  src: /demos/gcy/idea/
+  devSrc: http://localhost:5173/
+  height: 720
