@@ -1,6 +1,17 @@
 import * as React from 'react'
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}))
 
 import { WorksHome } from './WorksHome'
 
@@ -8,6 +19,12 @@ describe('WorksHome', () => {
   it('renders title', () => {
     render(
       <WorksHome
+        authors={{
+          gcy: {
+            id: 'gcy',
+            name: 'GCY',
+          },
+        }}
         categories={['All']}
         works={[
           {

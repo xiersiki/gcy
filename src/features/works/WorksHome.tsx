@@ -2,23 +2,40 @@
 
 import { useMemo, useState } from 'react'
 
-import type { WorkIndexItem } from '@/content/types'
+import type { AuthorProfile, WorkIndexItem } from '@/content/types'
 
+import { IdeaBoardSection } from './IdeaBoardSection'
+import { IdeaDetailsModal } from './IdeaDetailsModal'
+import { IdeaPublishModal } from './IdeaPublishModal'
 import { WorkCard } from './WorkCard'
 import styles from './WorksHome.module.css'
 
 export type WorksHomeProps = {
+  authors: Record<string, AuthorProfile>
   works: WorkIndexItem[]
   categories: string[]
 }
 
-export function WorksHome({ works, categories }: WorksHomeProps) {
+export function WorksHome({ authors, works, categories }: WorksHomeProps) {
   const [activeCategory, setActiveCategory] = useState(categories[0] ?? 'All')
+  const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const filteredWorks = useMemo(() => {
     if (activeCategory === 'All') return works
     return works.filter((w) => w.category === activeCategory)
   }, [activeCategory, works])
+
+  const boardItems = useMemo(() => {
+    return works
+      .filter((w) => w.type === 'idea' && !w.draft)
+      .sort((a, b) => b.date.localeCompare(a.date))
+  }, [works])
+
+  const selectedIdea = useMemo(() => {
+    if (!selectedIdeaId) return null
+    return boardItems.find((w) => w.id === selectedIdeaId) ?? null
+  }, [boardItems, selectedIdeaId])
 
   return (
     <main>
@@ -45,11 +62,20 @@ export function WorksHome({ works, categories }: WorksHomeProps) {
       </section>
 
       {filteredWorks.length ? (
-        <div className="grid">
-          {filteredWorks.map((w) => (
-            <WorkCard key={w.id} work={w} />
-          ))}
-        </div>
+        <>
+          <div className="grid">
+            {filteredWorks.map((w) => (
+              <WorkCard key={w.id} work={w} />
+            ))}
+          </div>
+
+          <IdeaBoardSection
+            authors={authors}
+            ideas={boardItems}
+            onSelectIdea={(id) => setSelectedIdeaId(id)}
+            onOpenPublish={() => setIsCreateOpen(true)}
+          />
+        </>
       ) : (
         <div className={styles.empty}>
           <h3>No projects found in this category</h3>
@@ -58,6 +84,17 @@ export function WorksHome({ works, categories }: WorksHomeProps) {
           </button>
         </div>
       )}
+
+      <IdeaDetailsModal
+        authors={authors}
+        idea={selectedIdea}
+        onClose={() => setSelectedIdeaId(null)}
+      />
+      <IdeaPublishModal
+        authors={authors}
+        open={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+      />
     </main>
   )
 }

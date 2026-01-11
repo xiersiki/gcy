@@ -1,6 +1,6 @@
-import { categories, worksList } from '@/generated/content'
+import { authors, categories, worksList } from '@/generated/content'
 import { WorksHome } from '@/features/works/WorksHome'
 
 export default function WorksPage() {
-  return <WorksHome works={worksList} categories={['All', ...categories]} />
+  return <WorksHome authors={authors} works={worksList} categories={['All', ...categories]} />
 }
