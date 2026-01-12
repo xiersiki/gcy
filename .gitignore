@@ -109,6 +109,9 @@ coverage
 # next.js build output
 .next
 
+# built demo outputs copied for runtime serving
+public/demos
+
 # TypeScript incremental build info
 *.tsbuildinfo
 tsconfig.tsbuildinfo

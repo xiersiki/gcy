@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { AuthorProfile } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
 import { Modal } from '@/components/Modal'
 import modalStyles from '@/components/Modal.module.scss'
+import { readApiData } from '@/shared/api'
 
 type SubmitState =
   | { status: 'idle' }
@@ -14,7 +16,7 @@ type SubmitState =
 
 export type IdeaClaimModalProps = {
   open: boolean
-  idea: WorkIndexItem | null
+  idea: IdeaIndexItem | null
   authors: Record<string, AuthorProfile>
   onClose: () => void
 }
@@ -52,12 +54,8 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
           implementAuthorId: authorId,
         }),
       })
-      if (!res.ok) {
-        const raw = await res.text().catch(() => '')
-        throw new Error(`Claim failed (${res.status}): ${raw.slice(0, 100)}`)
-      }
-      const data = await res.json()
-      const prUrl = data?.ok ? data?.data?.prUrl : null
+      const data = await readApiData<{ prUrl: string }>(res)
+      const prUrl = data?.prUrl ?? null
       if (!prUrl) throw new Error('Claim successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
     } catch (err) {
@@ -68,7 +66,7 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
     }
   }
 
-  const isDisabled = !idea || (idea.idea?.status ?? 'open') !== 'open'
+  const isDisabled = !idea || idea.idea.status !== 'open'
 
   return (
     <Modal

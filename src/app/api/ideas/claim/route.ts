@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'edge'
 
+import { ensureSafeId } from '@/shared/id'
+
 export async function POST(req: Request) {
   const { getRequestId } = await import('@/server/api/request')
   const requestId = getRequestId(req)
@@ -40,18 +42,9 @@ export async function POST(req: Request) {
       })
     }
 
-    function ensureSafeId(id: string) {
-      const s = id
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '')
-      if (!s) throw new Error('无效的 id')
-      return s
-    }
-
-    const ideaAuthorId = ensureSafeId(body.authorId)
-    const ideaSlug = ensureSafeId(body.slug)
-    const implementAuthorId = ensureSafeId(body.implementAuthorId)
+    const ideaAuthorId = ensureSafeId(body.authorId, 'authorId')
+    const ideaSlug = ensureSafeId(body.slug, 'slug')
+    const implementAuthorId = ensureSafeId(body.implementAuthorId, 'implementAuthorId')
 
     const { data: existing, error: findErr } = await supabase
       .from('ideas')

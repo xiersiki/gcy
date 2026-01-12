@@ -3,13 +3,14 @@
 import { GitPullRequest, Layout } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { AuthorProfile } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
 
 import styles from './IdeaBoardSection.module.scss'
 
 export type IdeaBoardSectionProps = {
   authors: Record<string, AuthorProfile>
-  ideas: WorkIndexItem[]
+  ideas: IdeaIndexItem[]
   onSelectIdea: (id: string) => void
 }
 
@@ -18,7 +19,7 @@ export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSect
 
   const filteredIdeas = useMemo(() => {
     if (activeStatus === 'All') return ideas
-    return ideas.filter((w) => (w.idea?.status ?? 'open') === activeStatus)
+    return ideas.filter((w) => w.idea.status === activeStatus)
   }, [activeStatus, ideas])
 
   return (
@@ -47,7 +48,7 @@ export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSect
           {filteredIdeas.map((w) => {
             const author = authors[w.authorId]
             const authorName = author?.name ?? w.authorId
-            const status = w.idea?.status ?? 'open'
+            const status = w.idea.status
 
             return (
               <div
@@ -97,7 +98,7 @@ export function IdeaBoardSection({ authors, ideas, onSelectIdea }: IdeaBoardSect
                   <p className={styles.boardSummary}>{w.summary}</p>
                 </div>
 
-                {status === 'in-progress' && w.idea?.claimedBy && (
+                {status === 'in-progress' && w.idea.claimedBy && (
                   <div className={styles.boardClaimedBy}>
                     <div className={styles.dot} />
                     <span>Claimed by</span>

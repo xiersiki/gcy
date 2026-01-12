@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
+import { readApiData } from '@/shared/api'
 import { BgDecor } from './BgDecor'
 import { IdeaBoardSection } from './IdeaBoardSection'
 import { IdeaClaimModal } from './IdeaClaimModal'
@@ -19,28 +21,51 @@ export type IdeasPageContentProps = {
   works: WorkIndexItem[]
 }
 
+function toIdeaIndexItemFromWork(w: WorkIndexItem): IdeaIndexItem {
+  return {
+    id: w.id,
+    authorId: w.authorId,
+    slug: w.slug,
+    title: w.title,
+    summary: w.summary,
+    date: w.date,
+    tags: w.tags,
+    idea: {
+      status: (w.idea?.status as IdeaIndexItem['idea']['status'] | undefined) ?? 'open',
+      claimedBy: w.idea?.claimedBy,
+      claimedAt: w.idea?.claimedAt,
+      claimPrUrl: w.idea?.claimPrUrl,
+      implementedWorkId: w.idea?.implementedWorkId,
+      implementedPrUrl: w.idea?.implementedPrUrl,
+      branch: w.idea?.branch,
+      compareUrl: w.idea?.compareUrl,
+      pending: w.idea?.pending,
+    },
+    source: 'content',
+  }
+}
+
 export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isClaimOpen, setIsClaimOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
-  const [communityIdeasRemote, setCommunityIdeasRemote] = useState<WorkIndexItem[]>([])
+  const [communityIdeasRemote, setCommunityIdeasRemote] = useState<IdeaIndexItem[]>([])
 
   const boardItems = useMemo(() => {
     return works
       .filter((w) => w.type === 'idea' && !w.draft)
+      .map(toIdeaIndexItemFromWork)
       .sort((a, b) => b.date.localeCompare(a.date))
   }, [works])
 
   useEffect(() => {
     let cancelled = false
     fetch('/api/ideas/community')
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => readApiData<IdeaIndexItem[]>(r))
       .then((list) => {
         if (cancelled) return
-        const maybe = list as { ok?: unknown; data?: unknown } | null
-        const data = maybe && maybe.ok === true ? maybe.data : null
-        setCommunityIdeasRemote(Array.isArray(data) ? (data as WorkIndexItem[]) : [])
+        setCommunityIdeasRemote(Array.isArray(list) ? list : [])
       })
       .catch(() => {
         if (cancelled) return
@@ -52,10 +77,41 @@ export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
   }, [])
 
   const communityIdeas = useMemo(() => {
-    const byId = new Map<string, WorkIndexItem>()
-    for (const it of communityIdeasRemote) byId.set(it.id, it)
-    for (const it of boardItems) byId.set(it.id, it)
-    return Array.from(byId.values()).sort((a, b) => b.date.localeCompare(a.date))
+    const localById = new Map<string, IdeaIndexItem>()
+    for (const it of boardItems) localById.set(it.id, it)
+
+    const remoteById = new Map<string, IdeaIndexItem>()
+    for (const it of communityIdeasRemote) remoteById.set(it.id, it)
+
+    const ids = new Set<string>([...localById.keys(), ...remoteById.keys()])
+    const merged: IdeaIndexItem[] = []
+
+    for (const id of ids) {
+      const local = localById.get(id)
+      const remote = remoteById.get(id)
+      if (local && remote) {
+        merged.push({
+          id,
+          authorId: local.authorId,
+          slug: local.slug,
+          title: local.title || remote.title,
+          summary: local.summary || remote.summary,
+          date: remote.date || local.date,
+          tags: remote.tags ?? local.tags,
+          idea: {
+            ...local.idea,
+            ...remote.idea,
+            status: remote.idea.status,
+          },
+          source: 'supabase',
+        })
+        continue
+      }
+      merged.push(local ?? (remote as IdeaIndexItem))
+    }
+
+    merged.sort((a, b) => b.date.localeCompare(a.date))
+    return merged
   }, [boardItems, communityIdeasRemote])
 
   const selectedIdea = useMemo(() => {
@@ -119,7 +175,7 @@ export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
         authors={authors}
         open={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onPublished={(idea: WorkIndexItem) => {
+        onPublished={(idea) => {
           setCommunityIdeasRemote((prev) => {
             const next = [idea, ...prev.filter((it) => it.id !== idea.id)]
             next.sort((a, b) => b.date.localeCompare(a.date))

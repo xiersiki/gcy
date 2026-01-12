@@ -9,7 +9,8 @@
 - ESLint + Prettier
 - Husky + lint-staged + commitlint（Conventional Commits）
 - Vitest + Testing Library
-- GitHub Actions：CI + GitHub Pages 部署
+- GitHub Actions：CI
+- Cloudflare：生产部署
 
 ## 快速开始
 
@@ -87,4 +88,3 @@ chore: 升级依赖
 ## CI/CD
 
 - CI：在 PR / push(main) 时执行 format、lint、typecheck、test、build
-- Pages：push(main) 自动构建并发布到 GitHub Pages

@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { AuthorProfile } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
 import { Modal } from '@/components/Modal'
 import modalStyles from '@/components/Modal.module.scss'
+import { readApiData } from '@/shared/api'
 
 type SubmitState =
   | { status: 'idle' }
@@ -14,7 +16,7 @@ type SubmitState =
 
 export type IdeaCompleteModalProps = {
   open: boolean
-  idea: WorkIndexItem | null
+  idea: IdeaIndexItem | null
   authors: Record<string, AuthorProfile>
   onClose: () => void
 }
@@ -56,11 +58,7 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
           title: workTitle.trim() || undefined,
         }),
       })
-      if (!res.ok) {
-        const raw = await res.text().catch(() => '')
-        throw new Error(`Failed to create completion PR (${res.status}): ${raw.slice(0, 100)}`)
-      }
-      const data = await res.json()
+      const data = await readApiData<{ prUrl: string }>(res)
       const prUrl = data?.prUrl
       if (!prUrl) throw new Error('Completion successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
@@ -72,8 +70,7 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
     }
   }
 
-  const isDisabled =
-    !idea || (idea.idea?.status ?? 'open') === 'done' || submitState.status === 'submitting'
+  const isDisabled = !idea || idea.idea.status === 'done' || submitState.status === 'submitting'
 
   return (
     <Modal

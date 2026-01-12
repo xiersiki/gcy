@@ -6,6 +6,7 @@ import { getRequestId } from '@/server/api/request'
 import { checkRateLimit } from '@/server/api/ratelimit'
 import { jsonError, jsonOk } from '@/server/api/response'
 import { slugifyTitle } from '@/server/ideas/slug'
+import { ensureSafeId } from '@/shared/id'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { getSupabaseEnv } from '@/server/supabase/env'
 
@@ -15,15 +16,6 @@ type Payload = {
   summary: string
   details?: string
   tags?: string[]
-}
-
-function ensureSafeId(id: string) {
-  const s = id
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '')
-  if (!s) throw new Error('无效的 authorId')
-  return s
 }
 
 async function readPayloadAndImages(req: Request): Promise<{ payload: Payload; images: File[] }> {
@@ -75,7 +67,7 @@ export async function POST(req: Request) {
     }
 
     const { payload, images } = await readPayloadAndImages(req)
-    const authorId = ensureSafeId(payload.authorId)
+    const authorId = ensureSafeId(payload.authorId, 'authorId')
     const title = String(payload.title || '').trim()
     const summary = String(payload.summary || '').trim()
     if (!title)

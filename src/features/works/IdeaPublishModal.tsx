@@ -3,9 +3,12 @@
 import { Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { AuthorProfile } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
 import { Modal } from '@/components/Modal'
 import modalStyles from '@/components/Modal.module.scss'
+import { slugifyTitle } from '@/shared/slug'
+import { readApiData } from '@/shared/api'
 
 type IdeaFormDraft = {
   authorId: string
@@ -18,27 +21,14 @@ type IdeaFormDraft = {
 type SubmitState =
   | { status: 'idle' }
   | { status: 'submitting' }
-  | { status: 'success'; idea: WorkIndexItem }
+  | { status: 'success'; idea: IdeaIndexItem }
   | { status: 'error'; message: string }
 
 export type IdeaPublishModalProps = {
   authors: Record<string, AuthorProfile>
   open: boolean
   onClose: () => void
-  onPublished?: (idea: WorkIndexItem) => void
-}
-
-function slugifyTitle(title: string) {
-  const normalized = title
-    .trim()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-  const slug = normalized
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48)
-  return slug || 'idea'
+  onPublished?: (idea: IdeaIndexItem) => void
 }
 
 function validateDraft(draft: IdeaFormDraft) {
@@ -165,25 +155,43 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
         throw new Error(`Submission failed (${res.status}): ${raw.slice(0, 100)}`)
       }
 
-      const data = await res.json()
-      const dto = data?.data
-      if (!data?.ok || !dto) throw new Error('Missing data in response')
+      const dto = await readApiData<{
+        id: string
+        authorId: string
+        slug: string
+        title: string
+        summary: string
+        details: string | null
+        tags: string[]
+        status: string
+        createdAt: string
+        claimedBy: string | null
+        claimPrUrl: string | null
+        imageUrls: string[]
+      }>(res)
+      if (!dto) throw new Error('Missing data in response')
 
-      const idea: WorkIndexItem = {
+      const statusRaw = String(dto.status || 'open')
+      const statusNormalized =
+        statusRaw === 'open' || statusRaw === 'in-progress' || statusRaw === 'done'
+          ? statusRaw
+          : 'open'
+
+      const idea: IdeaIndexItem = {
         id: `${dto.authorId}/${dto.slug}`,
         authorId: dto.authorId,
         slug: dto.slug,
         title: dto.title,
         summary: dto.summary,
-        type: 'idea',
         date: (dto.createdAt || new Date().toISOString()).slice(0, 10),
         tags: dto.tags ?? validated.payload.tags,
         idea: {
-          status: dto.status || 'open',
+          status: statusNormalized,
           claimedBy: dto.claimedBy ?? undefined,
           claimPrUrl: dto.claimPrUrl ?? undefined,
           pending: false,
         },
+        source: 'supabase',
       }
       setSubmitState({ status: 'success', idea })
       onPublished?.(idea)

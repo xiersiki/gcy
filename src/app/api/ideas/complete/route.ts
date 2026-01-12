@@ -1,6 +1,12 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'edge'
 
+import { ensureSafeId } from '@/shared/id'
+import { slugifyTitle } from '@/shared/slug'
+import { ApiErrorCode } from '@/server/api/errors'
+import { getRequestId } from '@/server/api/request'
+import { jsonError, jsonOk } from '@/server/api/response'
+
 type Payload = {
   ideaId: string
   implementAuthorId: string
@@ -12,28 +18,6 @@ function ensureSafeIdeaId(id: string) {
   const trimmed = id.trim()
   if (!/^[a-z0-9-]+\/[a-z0-9-]+$/i.test(trimmed)) throw new Error('无效的 ideaId')
   return trimmed
-}
-
-function ensureSafeId(id: string) {
-  const s = id
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '')
-  if (!s) throw new Error('无效的 authorId')
-  return s
-}
-
-function slugifyTitle(title: string) {
-  const normalized = title
-    .trim()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-  const slug = normalized
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48)
-  return slug || 'work'
 }
 
 function toIsoDate() {
@@ -189,18 +173,25 @@ async function checkExists(owner: string, repo: string, token: string, path: str
 }
 
 export async function POST(req: Request) {
+  const requestId = getRequestId(req)
   try {
     const body = (await req.json().catch(() => null)) as Payload | null
-    if (!body) throw new Error('缺少有效 payload')
+    if (!body)
+      return jsonError(ApiErrorCode.BadRequest, '缺少有效 payload', 400, {
+        headers: { 'x-request-id': requestId },
+      })
 
     const owner = process.env.GITHUB_OWNER || ''
     const repo = process.env.GITHUB_REPO || ''
     const token = process.env.GITHUB_TOKEN || ''
     const base = process.env.GITHUB_BASE || 'main'
-    if (!owner || !repo || !token) throw new Error('缺少 GitHub 配置')
+    if (!owner || !repo || !token)
+      return jsonError(ApiErrorCode.GitHubError, '缺少 GitHub 配置', 500, {
+        headers: { 'x-request-id': requestId },
+      })
 
     const ideaId = ensureSafeIdeaId(body.ideaId)
-    const implementAuthorId = ensureSafeId(body.implementAuthorId)
+    const implementAuthorId = ensureSafeId(body.implementAuthorId, 'implementAuthorId')
     const workType = body.workType === 'case-study' ? 'case-study' : 'demo'
     const [ideaAuthorId, ideaSlug] = ideaId.split('/') as [string, string]
 
@@ -258,11 +249,11 @@ export async function POST(req: Request) {
     const ideaMdxRaw = decodeBase64ToUtf8(ideaMdxJson.content)
 
     const title = (body.title && body.title.trim()) || String(ideaMeta.title || '').trim() || ideaId
-    let slug = slugifyTitle(title)
+    let slug = slugifyTitle(title, { fallback: 'work' })
     for (let i = 2; i <= 9; i += 1) {
       const candidateMeta = `content/works/${implementAuthorId}/${slug}/meta.yml`
       if (!(await checkExists(owner, repo, token, candidateMeta, base))) break
-      slug = `${slugifyTitle(title)}-${i}`
+      slug = `${slugifyTitle(title, { fallback: 'work' })}-${i}`
     }
 
     const workId = `${implementAuthorId}/${slug}`
@@ -453,12 +444,12 @@ export async function POST(req: Request) {
       if (!prUrl) throw new Error(`创建 PR 失败：${prRes.status} ${raw.slice(0, 200)}`)
     }
 
-    return new Response(JSON.stringify({ prUrl }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    })
+    return jsonOk({ prUrl }, { headers: { 'x-request-id': requestId } })
   } catch (err) {
     const message = err instanceof Error ? err.message : '创建失败'
-    return new Response(message, { status: 500 })
+    const status = message.includes('无效的') || message.includes('缺少有效 payload') ? 400 : 500
+    return jsonError(ApiErrorCode.BadRequest, message, status, {
+      headers: { 'x-request-id': requestId },
+    })
   }
 }

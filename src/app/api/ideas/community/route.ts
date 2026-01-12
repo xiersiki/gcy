@@ -6,6 +6,7 @@ import { getRequestId } from '@/server/api/request'
 import { jsonError, jsonOk } from '@/server/api/response'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { getSupabaseEnv } from '@/server/supabase/env'
+import type { IdeaIndexItem } from '@/models/idea'
 
 function toWorkId(authorId: string, slug: string) {
   return `${authorId}/${slug}`
@@ -51,7 +52,6 @@ export async function GET(req: Request) {
           slug,
           title: String(r.title ?? ''),
           summary: String(r.summary ?? ''),
-          type: 'idea' as const,
           date: createdAt ? createdAt.slice(0, 10) : '',
           tags: Array.isArray(r.tags) ? (r.tags as string[]) : undefined,
           idea: {
@@ -62,8 +62,8 @@ export async function GET(req: Request) {
             implementedWorkId: r.implemented_work_id ? String(r.implemented_work_id) : undefined,
             pending: false,
           },
-          external: undefined,
-        }
+          source: 'supabase' as const,
+        } satisfies IdeaIndexItem
       }) ?? []
 
     return jsonOk(items, { headers: { 'x-request-id': requestId } })

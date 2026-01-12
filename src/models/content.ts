@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react'
 
+import type { IdeaMeta } from './idea'
+
 export type AuthorProfile = {
   id: string
   name: string
@@ -17,20 +19,6 @@ export type WorkDemo = {
   height?: number
 }
 
-export type IdeaStatus = 'open' | 'in-progress' | 'done'
-
-export type IdeaMeta = {
-  status?: IdeaStatus
-  claimedBy?: string
-  claimedAt?: string
-  claimPrUrl?: string
-  implementedWorkId?: string
-  implementedPrUrl?: string
-  branch?: string
-  compareUrl?: string
-  pending?: boolean
-}
-
 export type WorkMeta = {
   title: string
   summary: string
@@ -41,7 +29,7 @@ export type WorkMeta = {
   cover?: string
   draft?: boolean
   demo?: WorkDemo
-  idea?: IdeaMeta
+  idea?: Partial<IdeaMeta>
   sourceIdeaId?: string
   external?: {
     demoUrl?: string

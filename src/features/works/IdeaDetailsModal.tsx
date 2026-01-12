@@ -2,14 +2,15 @@
 
 import { useRouter } from 'next/navigation'
 import { Calendar, User } from 'lucide-react'
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
+import type { AuthorProfile } from '@/models/content'
+import type { IdeaIndexItem } from '@/models/idea'
 import { Modal } from '@/components/Modal'
 import modalStyles from '@/components/Modal.module.scss'
 import styles from './IdeaDetailsModal.module.scss'
 
 export type IdeaDetailsModalProps = {
   authors: Record<string, AuthorProfile>
-  idea: WorkIndexItem | null
+  idea: IdeaIndexItem | null
   onClose: () => void
   onOpenClaim: () => void
   onOpenComplete: () => void
@@ -23,9 +24,9 @@ export function IdeaDetailsModal({
   onOpenComplete,
 }: IdeaDetailsModalProps) {
   const router = useRouter()
-  const status = idea?.idea?.status ?? 'open'
+  const status = idea?.idea.status ?? 'open'
   const implementedHref =
-    idea?.idea?.implementedWorkId && idea.idea.implementedWorkId.includes('/')
+    idea?.idea.implementedWorkId && idea.idea.implementedWorkId.includes('/')
       ? `/works/${idea.idea.implementedWorkId.split('/')[0]}/${idea.idea.implementedWorkId.split('/')[1]}`
       : null
 
@@ -71,10 +72,10 @@ export function IdeaDetailsModal({
               </>
             )}
 
-            {idea.idea?.pending && idea.idea.compareUrl ? (
+            {idea.idea.pending && idea.idea.compareUrl ? (
               <button
                 className={`${modalStyles.modalBtn} ${modalStyles.secondary}`}
-                onClick={() => window.open(idea.idea?.compareUrl, '_blank', 'noreferrer')}
+                onClick={() => window.open(idea.idea.compareUrl, '_blank', 'noreferrer')}
               >
                 View Branch
               </button>
@@ -139,7 +140,7 @@ export function IdeaDetailsModal({
             </div>
           ) : null}
 
-          {idea.idea?.claimedBy && (
+          {idea.idea.claimedBy && (
             <div className={styles.claimedBox}>
               <span className={styles.label}>Claimed by: </span>
               <span className={styles.value}>{idea.idea.claimedBy}</span>
