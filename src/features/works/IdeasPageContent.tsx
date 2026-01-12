@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { AuthorProfile, WorkIndexItem } from '@/models/content'
 import type { IdeaIndexItem } from '@/models/idea'
+import type { AuthorProfile } from '@/models/content'
 import { readApiData } from '@/shared/api'
 import { BgDecor } from './BgDecor'
 import { IdeaBoardSection } from './IdeaBoardSection'
@@ -13,51 +13,22 @@ import { IdeaClaimModal } from './IdeaClaimModal'
 import { IdeaCompleteModal } from './IdeaCompleteModal'
 import { IdeaDetailsModal } from './IdeaDetailsModal'
 import { IdeaPublishModal } from './IdeaPublishModal'
-import styles from './WorksHome.module.scss'
 import boardStyles from './IdeaBoardSection.module.scss'
+import styles from './WorksHome.module.scss'
 
 export type IdeasPageContentProps = {
   authors: Record<string, AuthorProfile>
-  works: WorkIndexItem[]
+  initialCommunityIdeas?: IdeaIndexItem[]
 }
 
-function toIdeaIndexItemFromWork(w: WorkIndexItem): IdeaIndexItem {
-  return {
-    id: w.id,
-    authorId: w.authorId,
-    slug: w.slug,
-    title: w.title,
-    summary: w.summary,
-    date: w.date,
-    tags: w.tags,
-    idea: {
-      status: (w.idea?.status as IdeaIndexItem['idea']['status'] | undefined) ?? 'open',
-      claimedBy: w.idea?.claimedBy,
-      claimedAt: w.idea?.claimedAt,
-      claimPrUrl: w.idea?.claimPrUrl,
-      implementedWorkId: w.idea?.implementedWorkId,
-      implementedPrUrl: w.idea?.implementedPrUrl,
-      branch: w.idea?.branch,
-      compareUrl: w.idea?.compareUrl,
-      pending: w.idea?.pending,
-    },
-    source: 'content',
-  }
-}
-
-export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
+export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageContentProps) {
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isClaimOpen, setIsClaimOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
-  const [communityIdeasRemote, setCommunityIdeasRemote] = useState<IdeaIndexItem[]>([])
-
-  const boardItems = useMemo(() => {
-    return works
-      .filter((w) => w.type === 'idea' && !w.draft)
-      .map(toIdeaIndexItemFromWork)
-      .sort((a, b) => b.date.localeCompare(a.date))
-  }, [works])
+  const [communityIdeasRemote, setCommunityIdeasRemote] = useState<IdeaIndexItem[]>(
+    () => initialCommunityIdeas ?? [],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -77,42 +48,10 @@ export function IdeasPageContent({ authors, works }: IdeasPageContentProps) {
   }, [])
 
   const communityIdeas = useMemo(() => {
-    const localById = new Map<string, IdeaIndexItem>()
-    for (const it of boardItems) localById.set(it.id, it)
-
-    const remoteById = new Map<string, IdeaIndexItem>()
-    for (const it of communityIdeasRemote) remoteById.set(it.id, it)
-
-    const ids = new Set<string>([...localById.keys(), ...remoteById.keys()])
-    const merged: IdeaIndexItem[] = []
-
-    for (const id of ids) {
-      const local = localById.get(id)
-      const remote = remoteById.get(id)
-      if (local && remote) {
-        merged.push({
-          id,
-          authorId: local.authorId,
-          slug: local.slug,
-          title: local.title || remote.title,
-          summary: local.summary || remote.summary,
-          date: remote.date || local.date,
-          tags: remote.tags ?? local.tags,
-          idea: {
-            ...local.idea,
-            ...remote.idea,
-            status: remote.idea.status,
-          },
-          source: 'supabase',
-        })
-        continue
-      }
-      merged.push(local ?? (remote as IdeaIndexItem))
-    }
-
-    merged.sort((a, b) => b.date.localeCompare(a.date))
-    return merged
-  }, [boardItems, communityIdeasRemote])
+    const list = [...communityIdeasRemote]
+    list.sort((a, b) => b.date.localeCompare(a.date))
+    return list
+  }, [communityIdeasRemote])
 
   const selectedIdea = useMemo(() => {
     if (!selectedIdeaId) return null

@@ -1,4 +1,4 @@
-@import '../../../styles/theme.scss';
+@use '../../../styles/theme.scss' as *;
 
 .container {
   min-height: calc(100vh - #{$nav-height});

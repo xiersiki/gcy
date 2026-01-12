@@ -1,5 +1,4 @@
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 import { ApiErrorCode } from '@/server/api/errors'
 import { getRequestId } from '@/server/api/request'

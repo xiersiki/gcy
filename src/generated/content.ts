@@ -43,6 +43,7 @@ export const works: Record<string, { id: string; authorId: string; slug: string;
         date: '2026-01-01',
         tags: ['demo'],
         category: 'Web App',
+        draft: true,
       },
     },
   }

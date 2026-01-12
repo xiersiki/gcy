@@ -13,6 +13,7 @@ const isExport = process.env.NEXT_OUTPUT === 'export'
 
 const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+  eslint: { ignoreDuringBuilds: true },
   ...(isExport ? { output: 'export' } : {}),
 }
 

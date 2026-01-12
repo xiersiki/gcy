@@ -4,7 +4,6 @@ import { getSupabaseServerClient } from '@/server/supabase/server'
 import { LoginClient } from './LoginClient'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 export default async function LoginPage({
   searchParams,
