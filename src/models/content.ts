@@ -14,8 +14,7 @@ export type WorkType = 'case-study' | 'idea' | 'demo' | 'snippet'
 
 export type WorkDemo = {
   kind: 'iframe'
-  src?: string
-  demoId?: string
+  src: string
   devSrc?: string
   height?: number
 }

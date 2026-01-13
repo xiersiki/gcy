@@ -23,11 +23,9 @@ pnpm dev
 
 - 开发：`pnpm dev`（会先运行 `content:build` 生成内容索引）
 - 联调某个作品：`pnpm dev:work -- <authorId>/<slug>`（同时启动主站 + 对应 demo）
-- 构建（SSR）：`pnpm build`（会先生成内容索引与 demos，再进行 Next.js SSR 构建）
-- 生产启动（Node SSR）：`pnpm start`
-- Cloudflare 产物构建：`pnpm build:cloudflare`（生成 `.open-next/`）
-- Cloudflare 本地预览：`pnpm preview:cloudflare`
-- Cloudflare 部署：`pnpm deploy:cloudflare`
+- 构建：`pnpm build`（会先运行 `content:build` 再进行 Next.js 构建）
+- 预览构建产物：`pnpm preview`（需先 `pnpm build`）
+- 生产启动：`pnpm start`
 - 类型检查：`pnpm typecheck`
 - ESLint：`pnpm lint` / `pnpm lint:fix`
 - Prettier：`pnpm format` / `pnpm format:check`
@@ -53,7 +51,7 @@ scripts/
   dev/
     work.mjs                               同时启动主站 + 指定 demo
   build/
-    sync-public-demos.mjs                  同步 demos 到 public/demos 并生成 manifest
+    assemble-dist.mjs                      聚合主站与 demos 到 dist/
 src/
   app/                                    Next.js App Router 页面
   components/                              通用组件（含 demo iframe 容器）
@@ -90,4 +88,3 @@ chore: 升级依赖
 ## CI/CD
 
 - CI：在 PR / push(main) 时执行 format、lint、typecheck、test、build
-- Cloudflare：默认部署形态为 Workers（不是 Pages 静态目录）。使用 OpenNext 生成 `.open-next/` 后由 Wrangler 部署

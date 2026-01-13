@@ -42,8 +42,7 @@ export default async function WorkPage({
     work.meta.demo?.kind === 'iframe'
       ? process.env.NODE_ENV === 'development' && work.meta.demo.devSrc
         ? work.meta.demo.devSrc
-        : (work.meta.demo.src ??
-          (work.meta.demo.demoId ? `/demos/${work.meta.demo.demoId}/index.html` : undefined))
+        : work.meta.demo.src
       : undefined
 
   return (

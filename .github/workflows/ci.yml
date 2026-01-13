@@ -13,13 +13,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
       - uses: pnpm/action-setup@v4
         with:
           version: 10.23.0
@@ -44,82 +44,4 @@ jobs:
       - run: pnpm run lint
       - run: pnpm run typecheck
       - run: pnpm run test:ci
-
-  build:
-    needs: checks
-    runs-on: ubuntu-latest
-    env:
-      NEXT_TELEMETRY_DISABLED: '1'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.23.0
-      - name: Get pnpm store path
-        id: pnpm-store
-        run: echo "store_path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-store.outputs.store_path }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Cache Next.js build cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-next-cache-${{ hashFiles('pnpm-lock.yaml', 'next.config.*', 'src/**', 'content/**', 'scripts/**', 'demos/**') }}
-          restore-keys: |
-            ${{ runner.os }}-next-cache-
-      - name: Use npmjs registry
-        run: |
-          pnpm config set registry https://registry.npmjs.org/
-          npm config set registry https://registry.npmjs.org/
-          pnpm config get registry
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
       - run: pnpm run build
-
-  cloudflare-build:
-    needs: checks
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    env:
-      NEXT_TELEMETRY_DISABLED: '1'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.23.0
-      - name: Get pnpm store path
-        id: pnpm-store
-        run: echo "store_path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-store.outputs.store_path }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Cache Next.js build cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-next-cache-${{ hashFiles('pnpm-lock.yaml', 'next.config.*', 'src/**', 'content/**', 'scripts/**', 'demos/**') }}
-          restore-keys: |
-            ${{ runner.os }}-next-cache-
-      - name: Use npmjs registry
-        run: |
-          pnpm config set registry https://registry.npmjs.org/
-          npm config set registry https://registry.npmjs.org/
-          pnpm config get registry
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - run: pnpm run build:cloudflare

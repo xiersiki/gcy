@@ -2,7 +2,7 @@
 
 ## 环境要求
 
-- Node.js 24
+- Node.js 18+（建议 20+）
 - pnpm 10+
 
 ## 本地开发
@@ -32,17 +32,10 @@ pnpm coverage
 
 ```bash
 pnpm build
-pnpm start
+pnpm preview
 ```
 
 ## 产物目录
 
-- `pnpm build` 会生成 Next.js SSR 产物（`.next/`）
-- `pnpm run build:prepare` 会生成内容索引与 demos 静态产物（同步到 `public/demos/`，并写入 `public/demos/manifest.json`）
-- Cloudflare 生产部署使用 Workers（OpenNext 产物目录为 `.open-next/`，由 `pnpm run build:cloudflare` 生成）
-
-## Cloudflare（Workers）本地预览
-
-```bash
-pnpm preview:cloudflare
-```
+- `pnpm build` 会生成 `out/`（Next.js export）并聚合成最终部署目录 `dist/`
+- Cloudflare Pages 输出目录指向 `dist/`
