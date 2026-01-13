@@ -13,6 +13,25 @@ export const authors: Record<string, AuthorProfile> = {
 
 export const works: Record<string, { id: string; authorId: string; slug: string; meta: WorkMeta }> =
   {
+    'gcy/comment': {
+      id: 'gcy/comment',
+      authorId: 'gcy',
+      slug: 'comment',
+      meta: {
+        title: 'Comment Work',
+        summary: 'comment 的示例作品。',
+        type: 'demo',
+        date: '2026-01-12',
+        tags: ['demo', 'comment'],
+        category: 'Web App',
+        demo: {
+          kind: 'iframe',
+          src: '/demos/gcy/comment/',
+          devSrc: 'http://localhost:5173/',
+          height: 720,
+        },
+      },
+    },
     'gcy/demo2': {
       id: 'gcy/demo2',
       authorId: 'gcy',
@@ -32,25 +51,11 @@ export const works: Record<string, { id: string; authorId: string; slug: string;
         },
       },
     },
-    'gcy/demo': {
-      id: 'gcy/demo',
-      authorId: 'gcy',
-      slug: 'demo',
-      meta: {
-        title: 'Demo Work',
-        summary: '示例作品，用于验证内容管线与路由。',
-        type: 'idea',
-        date: '2026-01-01',
-        tags: ['demo'],
-        category: 'Web App',
-        draft: true,
-      },
-    },
   }
 
 export const workLoaders: Record<string, WorkEntry['load']> = {
+  'gcy/comment': () => import('./../../content/works/gcy/comment/index.mdx'),
   'gcy/demo2': () => import('./../../content/works/gcy/demo2/index.mdx'),
-  'gcy/demo': () => import('./../../content/works/gcy/demo/index.mdx'),
 }
 
 export const worksList = Object.values(works).map((w) => ({

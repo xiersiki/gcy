@@ -98,3 +98,26 @@ BASE_PATH="/my-repo/" pnpm build
 
 - 提交信息：Conventional Commits（例如 `feat: xxx` / `fix: xxx` / `chore: xxx`）
 - 提交前会运行 lint-staged（pre-commit）与 commitlint（commit-msg），不要绕过 hooks
+
+### AI 生成 Commit Message 约束
+
+当使用 Trae/AI 生成提交信息时，要求输出严格遵循以下格式（只输出提交信息本身，不要代码块、不要额外解释）：
+
+1. Header（必填，单行）：
+
+`<type>(<scope>): <subject>`
+
+- type：`feat` `fix` `docs` `chore` `refactor` `test` `build` `ci` `perf` `revert`
+- scope：优先使用与变更模块一致的短词（例如 `commentable` `comment` `content` `scripts` `deps` `build`）
+- subject：一句话概括变更，避免过长
+
+2. Body（可选，多行）：
+
+- 使用 `- ` 列表，描述 2~5 条关键改动
+- 每条尽量对应一个“可验证”的结果
+
+示例：
+
+`feat(comment): 新增划词评论功能基础框架与示例`
+
+`chore(deps): bump next to patched version`

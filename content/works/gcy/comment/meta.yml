@@ -1,0 +1,13 @@
+title: Comment Work
+summary: comment 的示例作品。
+type: demo
+date: 2026-01-12
+tags:
+  - demo
+  - comment
+category: Web App
+demo:
+  kind: iframe
+  src: /demos/gcy/comment/
+  devSrc: http://localhost:5173/
+  height: 720
