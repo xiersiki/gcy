@@ -8,6 +8,6 @@ tags:
 category: Web App
 demo:
   kind: iframe
-  src: /demos/gcy/demo2/
+  src: /demos/gcy/demo2/index.html
   devSrc: http://localhost:5173/
   height: 720

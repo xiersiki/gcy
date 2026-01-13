@@ -269,7 +269,7 @@ export async function POST(req: Request) {
       tags: Array.isArray(ideaMeta.tags) ? ideaMeta.tags : undefined,
       demo: {
         kind: 'iframe',
-        src: `/demos/${implementAuthorId}/${slug}/`,
+        src: `/demos/${implementAuthorId}/${slug}/index.html`,
         devSrc: 'http://localhost:5173/',
         height: 720,
       },

@@ -229,7 +229,7 @@ function createWorkMetaYml({ title, slug, authorId, port, height }) {
     'category: Web App',
     'demo:',
     '  kind: iframe',
-    `  src: /demos/${authorId}/${slug}/`,
+    `  src: /demos/${authorId}/${slug}/index.html`,
     `  devSrc: http://localhost:${port}/`,
     `  height: ${height}`,
     '',

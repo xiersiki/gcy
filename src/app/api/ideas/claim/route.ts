@@ -167,7 +167,7 @@ export async function POST(req: Request) {
       ...(tags.length ? ['tags:', ...tags.map((t) => `  - ${t}`)] : []),
       `demo:`,
       `  kind: iframe`,
-      `  src: /demos/${implementAuthorId}/${workSlug}/`,
+      `  src: /demos/${implementAuthorId}/${workSlug}/index.html`,
       `  devSrc: http://localhost:5173/`,
       `  height: 720`,
       ``,

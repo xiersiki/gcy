@@ -26,7 +26,7 @@ export const works: Record<string, { id: string; authorId: string; slug: string;
         category: 'Web App',
         demo: {
           kind: 'iframe',
-          src: '/demos/gcy/comment/',
+          src: '/demos/gcy/comment/index.html',
           devSrc: 'http://localhost:5173/',
           height: 720,
         },
@@ -45,7 +45,7 @@ export const works: Record<string, { id: string; authorId: string; slug: string;
         category: 'Web App',
         demo: {
           kind: 'iframe',
-          src: '/demos/gcy/demo2/',
+          src: '/demos/gcy/demo2/index.html',
           devSrc: 'http://localhost:5173/',
           height: 720,
         },
