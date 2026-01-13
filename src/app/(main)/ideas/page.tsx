@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+
 import { authors } from '@/generated/content'
 import type { IdeaIndexItem } from '@/models/idea'
 import { IdeasPageContent } from '@/features/works/IdeasPageContent'

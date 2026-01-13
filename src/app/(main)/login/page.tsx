@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 import { LoginClient } from './LoginClient'
 
+export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export default async function LoginPage({

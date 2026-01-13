@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 
 import { getSupabaseEnv } from '@/server/supabase/env'
 
+export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
