@@ -250,3 +250,4 @@ output_resource
 WARP.md
 
 .trae/*
+.pnpm-store-temp/*
