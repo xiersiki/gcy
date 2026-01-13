@@ -222,6 +222,10 @@ build
 dist
 build_*
 
+# Keep repository build scripts tracked (avoid matching the generic "build" ignore above)
+!scripts/build/
+!scripts/build/*.mjs
+
 **/app/view
 **/log/
 **/typings/auto-generated
@@ -250,4 +254,5 @@ output_resource
 WARP.md
 
 .trae/*
+!.trae/commit-message.md
 .pnpm-store-temp/*
