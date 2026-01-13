@@ -16,6 +16,7 @@ const repoRoot = path.resolve(__dirname, '..', '..')
 const demosRoot = path.join(repoRoot, 'demos')
 // publicDemosRoot 指向 Next.js 运行时可直接访问的静态目录（用于 iframe/静态资源引用）。
 const publicDemosRoot = path.join(repoRoot, 'public', 'demos')
+const publicManifestPath = path.join(publicDemosRoot, 'manifest.json')
 
 // 判断某个路径是否存在（文件或目录都算）。
 async function pathExists(p) {
@@ -69,8 +70,17 @@ async function copyDir(src, dest) {
 async function main() {
   // 每次构建前先清空 public/demos，避免残留旧 demo 产物。
   await rmrf(publicDemosRoot)
+  await mkdirp(publicDemosRoot)
   // 如果 demos 目录不存在，说明当前仓库没有 demo，直接结束即可。
-  if (!(await pathExists(demosRoot))) return
+  const manifest = []
+  if (!(await pathExists(demosRoot))) {
+    await fs.writeFile(
+      publicManifestPath,
+      JSON.stringify({ generatedAt: new Date().toISOString(), demos: manifest }, null, 2),
+      'utf8',
+    )
+    return
+  }
 
   // 读取 demos 下的一级目录（authorId），读取失败则按空数组处理。
   const authors = await fs.readdir(demosRoot, { withFileTypes: true }).catch(() => [])
@@ -98,8 +108,21 @@ async function main() {
       const target = path.join(publicDemosRoot, authorId, slug)
       // 把 demoDist 复制到 public/demos/** 下。
       await copyDir(demoDist, target)
+      manifest.push({
+        id: `${authorId}/${slug}`,
+        authorId,
+        slug,
+        kind: 'iframe',
+        src: `/demos/${authorId}/${slug}/index.html`,
+      })
     }
   }
+
+  await fs.writeFile(
+    publicManifestPath,
+    JSON.stringify({ generatedAt: new Date().toISOString(), demos: manifest }, null, 2),
+    'utf8',
+  )
 }
 
 // 执行主流程；若抛错则打印错误并设置退出码为 1（让 CI 正确失败）。

@@ -27,11 +27,15 @@ const WorkTypeSchema = z.enum(['case-study', 'idea', 'demo', 'snippet'])
 const WorkDemoSchema = z
   .object({
     kind: z.literal('iframe'),
-    src: z.string().min(1),
+    src: z.string().min(1).optional(),
+    demoId: z.string().min(1).optional(),
     devSrc: z.string().min(1).optional(),
     height: z.number().int().positive().optional(),
   })
   .strict()
+  .refine((d) => Boolean(d.src) || Boolean(d.demoId), {
+    message: 'work.meta.demo requires either src or demoId',
+  })
 
 const WorkMetaSchema = z
   .object({
