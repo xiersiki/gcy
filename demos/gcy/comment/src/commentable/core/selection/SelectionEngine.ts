@@ -3,6 +3,8 @@ export interface SelectionSnapshot {
   // range 是原生 DOM Range，记录选区起止位置，用于后续序列化锚点与计算高亮。
   range: Range
 
+  direction: 'forward' | 'backward'
+
   // text 是选区对应的纯文本（通常会 trim），用于最小长度判断与文本指纹（quote）记录。
   text: string
 
@@ -36,9 +38,26 @@ export function readSelectionSnapshot(
   // rects 为空代表选区不可见或无法计算坐标，无法定位 UI，因此返回 null。
   if (rects.length === 0) return null
 
+  const direction = getSelectionDirection(selection)
+
   // 取最后一个 rect 作为主定位矩形，通常更贴近选区结束位置。
   const rect = rects[rects.length - 1]
 
   // 返回标准化快照，供 SelectionGuard 与 UI 层消费。
-  return { range, text, rect, clientRects: rects }
+  return { range, direction, text, rect, clientRects: rects }
+}
+
+function getSelectionDirection(selection: Selection): 'forward' | 'backward' {
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = selection
+  if (!anchorNode || !focusNode) return 'forward'
+
+  if (anchorNode === focusNode) {
+    return anchorOffset <= focusOffset ? 'forward' : 'backward'
+  }
+
+  const position = anchorNode.compareDocumentPosition(focusNode)
+  if (position & Node.DOCUMENT_POSITION_FOLLOWING) return 'forward'
+  if (position & Node.DOCUMENT_POSITION_PRECEDING) return 'backward'
+
+  return 'forward'
 }

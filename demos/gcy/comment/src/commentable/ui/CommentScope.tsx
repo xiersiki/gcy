@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { readSelectionSnapshot } from '../core/selection/SelectionEngine'
 // 从 selection guard 导入规则校验：负责 minLength、容器范围、禁用区域等判定。
 import { guardSelectionSnapshot } from '../core/selection/SelectionGuard'
+import FloatingCommentButton from './FloatingCommentButton'
 
 // CommentScope 是可评论能力的根容器：未来会负责监听选区、渲染按钮/抽屉/高亮等。
 export default function CommentScope({ children }: { children: ReactNode }) {
@@ -68,6 +69,14 @@ export default function CommentScope({ children }: { children: ReactNode }) {
     <div ref={rootElement} data-commentable-has-selection={pendingSelection ? '1' : '0'}>
       {/* children 是被包裹的业务内容；CommentScope 不改变内容结构，只在外层增强能力 */}
       {children}
+      {pendingSelection && (
+        <FloatingCommentButton
+          rect={pendingSelection.rect}
+          direction={pendingSelection.direction}
+          text={pendingSelection.text}
+          range={pendingSelection.range}
+        />
+      )}
     </div>
   )
 }
