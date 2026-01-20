@@ -32,12 +32,15 @@
   .logoIcon {
     width: 2rem;
     height: 2rem;
-    background: $grad-primary;
-    border-radius: 0.625rem;
+    background: $primary-color;
+    border-radius: var(--radius-md);
     @include flex-center;
     color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+    box-shadow: $shadow-sm;
 
     svg {
       width: 1.25rem;
@@ -46,7 +49,8 @@
   }
 
   &:hover .logoIcon {
-    transform: rotate(-5deg) scale(1.05);
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
   }
 
   .brandName {
@@ -56,9 +60,7 @@
     color: $text-main;
 
     span {
-      background: $grad-text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: $primary-color;
     }
   }
 }
@@ -67,10 +69,10 @@
   display: none;
   align-items: center;
   gap: 0.75rem;
-  background: $bg-card;
+  background: $surface;
   padding: 0.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid $border-color;
+  border-radius: var(--radius-md);
+  border: 1px solid $divider;
 
   @media (min-width: 768px) {
     display: flex;
@@ -90,13 +92,13 @@
 
   &:hover {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
   }
 
   &.active {
     color: $text-main;
-    background: $glass-bg;
-    border: 1px solid $border-color;
+    background: $surface-2;
+    border: 1px solid $divider;
   }
 }
 

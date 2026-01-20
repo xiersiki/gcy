@@ -6,7 +6,8 @@ import { useMemo, useState } from 'react'
 import type { WorkIndexItem } from '@/models/content'
 import { BgDecor } from '@/components/shared/BgDecor'
 import { WorkCard } from './WorkCard'
-import styles from '@/components/shared/PageShell.module.scss'
+import layoutStyles from '@/components/shared/LayoutShell.module.scss'
+import styles from '@/components/shared/CollectionSection.module.scss'
 
 export type WorksPageContentProps = {
   works: WorkIndexItem[]
@@ -23,7 +24,7 @@ export function WorksPageContent({ works, categories }: WorksPageContentProps) {
   }, [activeCategory, works])
 
   return (
-    <div className={styles.container}>
+    <div className={layoutStyles.container}>
       <BgDecor />
       <motion.section
         initial={{ opacity: 0 }}

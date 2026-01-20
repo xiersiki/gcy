@@ -43,7 +43,7 @@
 }
 
 .authorHandle {
-  color: #818cf8; // Match the blue handle in reference
+  color: $primary-color;
   font-weight: 500;
   cursor: pointer;
 
@@ -77,17 +77,17 @@
 
   &:hover {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
   }
 }
 
 .tabs {
   display: flex;
   align-items: center;
-  background: $bg-card;
+  background: $surface;
   padding: 0.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid $border-color;
+  border-radius: var(--radius-md);
+  border: 1px solid $divider;
 }
 
 .tab {
@@ -110,7 +110,7 @@
 
   &.active {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
     box-shadow: $shadow-sm;
   }
 }
@@ -130,12 +130,13 @@
 
 .previewCard {
   flex: 1;
-  background: #ffffff;
-  border-radius: 1.5rem;
+  background: $surface;
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: $shadow-xl;
+  box-shadow: $shadow-lg;
   display: flex;
   flex-direction: column;
+  border: 1px solid $divider;
 }
 
 .docsWrapper {
@@ -163,8 +164,8 @@
   }
 
   code {
-    background: $bg-card;
-    border: 1px solid $border-color;
+    background: $surface-2;
+    border: 1px solid $divider;
     padding: 0.2rem 0.4rem;
     border-radius: 0.4rem;
     font-size: 0.9em;
@@ -176,7 +177,7 @@
     padding: 1.5rem;
     border-radius: 0.75rem;
     overflow-x: auto;
-    border: 1px solid $border-color;
+    border: 1px solid $divider;
     margin: 2rem 0;
 
     code {
@@ -194,7 +195,7 @@
   flex-direction: column;
   gap: 1rem;
   color: $slate-400;
-  background: $bg-dark; // Show dark when no preview instead of white
+  background: $surface-2;
 
   p {
     font-size: 1rem;

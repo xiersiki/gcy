@@ -8,11 +8,17 @@ $secondary-color: #10b981;
 $text-main: var(--text-main);
 $text-secondary: var(--text-secondary);
 $text-muted: var(--text-muted);
+$surface: var(--surface);
+$surface-2: var(--surface-2);
+$divider: var(--divider);
+$focus-ring: var(--focus-ring);
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
 
 // Gradients
-$grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-$grad-text: linear-gradient(to right, #818cf8, #22d3ee);
-$grad-surface: linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+$grad-primary: linear-gradient(180deg, $primary-color 0%, $primary-color 100%);
+$grad-text: linear-gradient(to right, $text-main, $text-main);
+$grad-surface: linear-gradient(to bottom right, $surface 0%, $surface 100%);
 
 // Spacing
 $container-max-width: 80rem;
@@ -28,17 +34,9 @@ $slate-900: #0f172a;
 
 // Effects
 $glass-bg: var(--glass-bg);
-$glass-blur: blur(16px);
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md:
-  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg:
-  0 10px 15px -3px rgba(0, 0, 0, 0.1),
-  0 4px 6px -2px rgba(0, 0, 0, 0.05);
-$shadow-xl:
-  0 20px 25px -5px rgba(0, 0, 0, 0.2),
-  0 10px 10px -5px rgba(0, 0, 0, 0.1);
+$glass-blur: none;
+$shadow-lg: var(--shadow-lg);
+$shadow-xl: var(--shadow-xl);
 
 // Mixins
 @mixin flex-center {
@@ -48,26 +46,29 @@ $shadow-xl:
 }
 
 @mixin glass-effect {
-  background: $glass-bg;
-  backdrop-filter: $glass-blur;
-  border-bottom: 1px solid $border-color;
+  background: var(--nav-bg);
+  backdrop-filter: none;
+  border-bottom: 1px solid $divider;
 }
 
 @mixin card-style {
-  background: $bg-card;
-  backdrop-filter: blur(8px);
-  border: 1px solid $border-color;
-  border-radius: 1.25rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: $surface;
+  border: 1px solid $divider;
+  border-radius: var(--radius-lg);
+  box-shadow: $shadow-sm;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     border-color: $primary-color;
-    background: $glass-bg;
-    transform: translateY(-4px);
-    box-shadow: $shadow-xl;
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
   }
 }
 
 @mixin section-padding {
-  padding: 6rem 1.5rem;
+  padding: 4rem 1.5rem;
 }

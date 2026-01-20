@@ -13,7 +13,8 @@ import { IdeaCompleteModal } from './IdeaCompleteModal'
 import { IdeaDetailsModal } from './IdeaDetailsModal'
 import { IdeaPublishModal } from './IdeaPublishModal'
 import boardStyles from './IdeaBoardSection.module.scss'
-import styles from '@/components/shared/PageShell.module.scss'
+import layoutStyles from '@/components/shared/LayoutShell.module.scss'
+import styles from '@/components/shared/CollectionSection.module.scss'
 import { useCommunityIdeas } from './hooks/useCommunityIdeas'
 
 export type IdeasPageContentProps = {
@@ -34,7 +35,7 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
   }, [communityIdeas, selectedIdeaId])
 
   return (
-    <div className={styles.container}>
+    <div className={layoutStyles.container}>
       <BgDecor />
       <motion.div
         initial={{ opacity: 0, y: 20 }}

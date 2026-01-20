@@ -1,0 +1,21 @@
+@use '../../styles/theme.scss' as *;
+
+.bgDecor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60vh;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+}
+
+.blob1 {
+  display: none;
+}
+
+.blob2 {
+  display: none;
+}

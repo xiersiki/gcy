@@ -4,11 +4,12 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { BgDecor } from '@/components/shared/BgDecor'
-import styles from '@/components/shared/PageShell.module.scss'
+import layoutStyles from '@/components/shared/LayoutShell.module.scss'
+import styles from '@/components/shared/HeroSection.module.scss'
 
 export function LandingSection() {
   return (
-    <div className={styles.container}>
+    <div className={layoutStyles.container}>
       <BgDecor />
 
       <section className={styles.hero}>
@@ -18,7 +19,7 @@ export function LandingSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Sparkles size={16} className="text-amber-400" />
+          <Sparkles size={16} />
           <span>Community Driven</span>
         </motion.div>
         <motion.h1

@@ -1,7 +1,7 @@
 @use '../../styles/theme.scss' as *;
 
 .boardSection {
-  padding: 3rem 0;
+  padding: 2.5rem 0;
 }
 
 .boardHeader {
@@ -31,36 +31,36 @@
 
 .boardFilters {
   display: flex;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 1rem;
   margin-bottom: 2rem;
-  padding: 0.25rem;
-  background: $bg-card;
-  border-radius: 0.75rem;
-  border: 1px solid $border-color;
-  width: fit-content;
 }
 
 .chip {
   background: transparent;
-  border: none;
+  border: 1px solid $divider;
   color: $text-secondary;
-  padding: 0.375rem 0.875rem;
-  border-radius: 0.625rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
+    border-color: $text-muted;
   }
 
   &.chipActive {
-    background: $glass-bg;
-    color: $primary-hover;
-    border: 1px solid $border-color;
+    color: $primary-color;
+    border-color: rgba(99, 102, 241, 0.35);
+    background: rgba(99, 102, 241, 0.08);
   }
 }
 
@@ -76,27 +76,12 @@
 
 .boardItem {
   @include card-style;
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   cursor: pointer;
   position: relative;
-  background: $bg-card;
-  border-radius: 1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &::before {
-    border-radius: 1rem;
-    background: linear-gradient(135deg, $border-color, transparent, $border-color);
-  }
-
-  &:hover {
-    background: rgba(31, 41, 55, 0.5);
-    border-color: $primary-color;
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  }
 }
 
 .boardItemHeader {
@@ -110,9 +95,9 @@
   height: 2.75rem;
   border-radius: 0.75rem;
   overflow: hidden;
-  border: 1px solid $border-color;
+  border: 1px solid $divider;
   flex-shrink: 0;
-  background: $bg-dark;
+  background: $surface-2;
   @include flex-center;
 
   img {
@@ -124,7 +109,7 @@
 
 .boardAvatarPlaceholder {
   font-weight: 700;
-  color: $primary-hover;
+  color: $primary-color;
   font-size: 1.125rem;
 }
 
@@ -197,15 +182,19 @@
 
 .boardButton {
   width: 100%;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: $primary-hover;
+  background: transparent;
+  border: 1px solid $divider;
+  color: $text-main;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,10 +202,9 @@
   margin-top: 0.5rem;
 
   &:hover {
-    background: $primary-color;
-    color: white;
     border-color: $primary-color;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    background: $surface-2;
+    box-shadow: $shadow-sm;
   }
 
   svg {
@@ -228,7 +216,7 @@
 .boardClaimedBy {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid $divider;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -239,43 +227,47 @@
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 50%;
-    background: $primary-hover;
+    background: $primary-color;
   }
 
   .handle {
-    color: $primary-hover;
+    color: $primary-color;
     font-weight: 600;
   }
 }
 
 .boardPublishButton {
-  background: $text-main !important;
-  color: $bg-dark !important;
-  border: none !important;
-  font-weight: 800 !important;
-  border-radius: 0.75rem !important;
-  height: auto !important;
-  padding: 0.5rem 1.25rem !important;
-  font-size: 0.875rem !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: $primary-color;
+  color: white;
+  border: 1px solid transparent;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  height: auto;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  box-shadow: $shadow-sm;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s !important;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
-    opacity: 0.9;
-    transform: translateY(-1px) !important;
+    background: $primary-hover;
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
   }
 }
 
 .boardEmpty {
   text-align: center;
-  padding: 6rem 2rem;
-  background: $bg-card;
-  border-radius: 2rem;
-  border: 2px dashed $border-color;
+  padding: 4rem 1.5rem;
+  background: $surface;
+  border-radius: var(--radius-lg);
+  border: 1px dashed $divider;
 
   h3 {
     font-size: 1.5rem;

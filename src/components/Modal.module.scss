@@ -13,41 +13,25 @@
 .backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.5);
 }
 
 .content {
   position: relative;
   width: 100%;
-  background: $glass-bg;
-  backdrop-filter: $glass-blur;
-  border: 1px solid $border-color;
-  border-radius: 1.25rem;
-  box-shadow: $shadow-xl;
+  background: $surface;
+  border: 1px solid $divider;
+  border-radius: var(--radius-lg);
+  box-shadow: $shadow-lg;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
   overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: 1.25rem;
-    background: linear-gradient(135deg, $border-color, transparent, $border-color);
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
 }
 
 .header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid $divider;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -72,7 +56,7 @@
 
   &:hover {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
   }
 }
 
@@ -96,12 +80,12 @@
 
 .footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid $divider;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  background: $bg-dark;
+  background: $surface-2;
 }
 
 /* Form Elements (Reusable in Modals) */
@@ -126,9 +110,9 @@
 
 .modalInput {
   width: 100%;
-  background: $bg-dark;
-  border: 1px solid $border-color;
-  border-radius: 0.75rem;
+  background: $surface-2;
+  border: 1px solid $divider;
+  border-radius: var(--radius-md);
   padding: 0.625rem 0.875rem;
   color: $text-main;
   font-size: 0.875rem;
@@ -139,7 +123,7 @@
   &:focus {
     outline: none;
     border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: var(--focus-ring);
   }
 
   &::placeholder {
@@ -149,9 +133,9 @@
 
 .modalSelect {
   width: 100%;
-  background: $bg-dark;
-  border: 1px solid $border-color;
-  border-radius: 0.75rem;
+  background: $surface-2;
+  border: 1px solid $divider;
+  border-radius: var(--radius-md);
   padding: 0.625rem 0.875rem;
   color: $text-main;
   font-size: 0.875rem;
@@ -166,11 +150,11 @@
   &:focus {
     outline: none;
     border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: var(--focus-ring);
   }
 
   option {
-    background: $bg-dark;
+    background: $surface-2;
     color: $text-main;
   }
 }
@@ -186,8 +170,8 @@
   aspect-ratio: 1;
   border-radius: 0.75rem;
   overflow: hidden;
-  border: 1px solid $border-color;
-  background: $bg-dark;
+  border: 1px solid $divider;
+  background: $surface-2;
 
   img {
     width: 100%;
@@ -221,7 +205,7 @@
 .uploadPlaceholder {
   aspect-ratio: 1;
   border-radius: 0.75rem;
-  border: 2px dashed $border-color;
+  border: 1px dashed $divider;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -237,13 +221,13 @@
   &:hover {
     border-color: $primary-color;
     color: $primary-color;
-    background: $glass-bg;
+    background: rgba(99, 102, 241, 0.08);
   }
 }
 
 .modalBtn {
   padding: 0.5rem 1.25rem;
-  border-radius: 0.625rem;
+  border-radius: var(--radius-md);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
@@ -251,13 +235,13 @@
   border: 1px solid transparent;
 
   &.primary {
-    background: $grad-primary;
+    background: $primary-color;
     color: white;
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+    box-shadow: $shadow-sm;
 
     &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+      background: $primary-hover;
+      box-shadow: $shadow-md;
     }
 
     &:disabled {
@@ -268,12 +252,12 @@
   }
 
   &.secondary {
-    background: $bg-dark;
-    border-color: $border-color;
+    background: transparent;
+    border-color: $divider;
     color: $text-main;
 
     &:hover {
-      background: $glass-bg;
+      background: $surface-2;
     }
   }
 }

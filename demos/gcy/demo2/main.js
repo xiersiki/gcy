@@ -25,7 +25,7 @@ function createStyle() {
     .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     button { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,.2); background: transparent; cursor: pointer; }
     .value { font-variant-numeric: tabular-nums; font-size: 24px; }
-    .box { height: var(--h); width: 100%; border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+    .box { height: var(--h); width: 100%; border-radius: 12px; background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.22); }
     .muted { opacity: .72; font-size: 12px; }
   `
   document.head.appendChild(style)

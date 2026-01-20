@@ -1,28 +1,32 @@
 @use '../styles/theme.scss' as *;
 
 .toggle {
-  background: $bg-card;
-  border: 1px solid $border-color;
+  background: $surface;
+  border: 1px solid $divider;
   color: $text-secondary;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   @include flex-center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     color: $text-main;
-    background: $glass-bg;
+    background: $surface-2;
     border-color: $primary-color;
-    transform: translateY(-1px);
+    box-shadow: $shadow-sm;
   }
 
   svg {
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s ease;
   }
 
   &:active svg {
-    transform: scale(0.8) rotate(15deg);
+    transform: scale(0.92);
   }
 }

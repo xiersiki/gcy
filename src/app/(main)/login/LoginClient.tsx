@@ -49,7 +49,7 @@ export function LoginClient({
 
   return (
     <div className={styles.container}>
-      <div style={{ position: 'absolute', top: '2rem', left: '2rem' }}>
+      <div className={styles.back}>
         <BackButton href="/" label="Back to Home" />
       </div>
       <div className={styles.loginCard}>
@@ -85,7 +85,7 @@ export function LoginClient({
         </div>
 
         {activeTab === 'login' ? (
-          <form action="/auth/password/login" method="post" className="space-y-4">
+          <form action="/auth/password/login" method="post" className={styles.form}>
             <div className={styles.formGroup}>
               <label>Email Address</label>
               <input
@@ -125,7 +125,7 @@ export function LoginClient({
                 alert('Passwords do not match.')
               }
             }}
-            className="space-y-4"
+            className={styles.form}
           >
             <div className={styles.formGroup}>
               <label>Email Address</label>
@@ -170,12 +170,16 @@ export function LoginClient({
           {activeTab === 'login' ? (
             <p>
               Don't have an account yet?
-              <button onClick={() => setActiveTab('signup')}>Create one</button>
+              <button type="button" onClick={() => setActiveTab('signup')}>
+                Create one
+              </button>
             </p>
           ) : (
             <p>
               Already have an account?
-              <button onClick={() => setActiveTab('login')}>Sign In</button>
+              <button type="button" onClick={() => setActiveTab('login')}>
+                Sign In
+              </button>
             </p>
           )}
         </div>
