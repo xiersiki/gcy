@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { BackButton } from '@/components/BackButton'
 import { WorkCard } from '@/features/works/WorkCard'
 import { tagsIndex, worksList } from '@/generated/content'
-import styles from '@/features/works/WorksHome.module.scss'
+import styles from '@/components/shared/PageShell.module.scss'
 
 export async function generateStaticParams() {
   return Object.keys(tagsIndex).map((tag) => ({ tag }))

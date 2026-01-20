@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { BgDecor } from './BgDecor'
-import styles from './WorksHome.module.scss'
+import { BgDecor } from '@/components/shared/BgDecor'
+import styles from '@/components/shared/PageShell.module.scss'
 
 export function LandingSection() {
   return (

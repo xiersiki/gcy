@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 
 import { getSupabaseEnv } from '@/server/supabase/env'
+import { createSupabaseRouteClient } from '@/server/supabase/route'
 
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
@@ -34,29 +34,7 @@ export async function POST(req: Request) {
     new URL('/login?success=' + encodeURIComponent('注册成功：请检查邮箱完成验证后再登录'), origin),
     { status: 302 },
   )
-  const supabase = createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        const cookieHeader = req.headers.get('cookie') || ''
-        if (!cookieHeader) return []
-        return cookieHeader
-          .split(';')
-          .map((p) => p.trim())
-          .filter(Boolean)
-          .map((part) => {
-            const idx = part.indexOf('=')
-            const name = idx >= 0 ? part.slice(0, idx) : part
-            const value = idx >= 0 ? decodeURIComponent(part.slice(idx + 1)) : ''
-            return { name, value }
-          })
-      },
-      setAll(cookiesToSet) {
-        for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options)
-        }
-      },
-    },
-  })
+  const supabase = createSupabaseRouteClient(req, response)
 
   const { error } = await supabase.auth.signUp({
     email,

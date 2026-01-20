@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import styles from './WorksHome.module.scss'
+import styles from './PageShell.module.scss'
 
 export function BgDecor() {
   return (

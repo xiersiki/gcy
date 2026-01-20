@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 
 import { getSupabaseEnv } from '@/server/supabase/env'
+import { createSupabaseRouteClient } from '@/server/supabase/route'
 
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
@@ -18,33 +18,8 @@ export async function POST(req: Request) {
     )
   }
 
-  const cookieHeader = req.headers.get('cookie') || ''
-  const requestCookies = cookieHeader
-    ? cookieHeader
-        .split(';')
-        .map((p) => p.trim())
-        .filter(Boolean)
-        .map((part) => {
-          const idx = part.indexOf('=')
-          const name = idx >= 0 ? part.slice(0, idx) : part
-          const value = idx >= 0 ? decodeURIComponent(part.slice(idx + 1)) : ''
-          return { name, value }
-        })
-    : []
-
   const response = NextResponse.redirect(new URL('/login', origin), { status: 302 })
-  const supabase = createServerClient(supabaseUrl, anonKey, {
-    cookies: {
-      getAll() {
-        return requestCookies
-      },
-      setAll(cookiesToSet) {
-        for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options)
-        }
-      },
-    },
-  })
+  const supabase = createSupabaseRouteClient(req, response)
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',

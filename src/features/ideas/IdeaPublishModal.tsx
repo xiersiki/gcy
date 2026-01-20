@@ -9,6 +9,7 @@ import { Modal } from '@/components/Modal'
 import modalStyles from '@/components/Modal.module.scss'
 import { slugifyTitle } from '@/shared/slug'
 import { readApiData } from '@/shared/api'
+import { mapIdeaPublishDtoToIndexItem } from '@/shared/ideas/mapper'
 
 type IdeaFormDraft = {
   authorId: string
@@ -171,28 +172,17 @@ export function IdeaPublishModal({ authors, open, onClose, onPublished }: IdeaPu
       }>(res)
       if (!dto) throw new Error('Missing data in response')
 
-      const statusRaw = String(dto.status || 'open')
-      const statusNormalized =
-        statusRaw === 'open' || statusRaw === 'in-progress' || statusRaw === 'done'
-          ? statusRaw
-          : 'open'
-
-      const idea: IdeaIndexItem = {
-        id: `${dto.authorId}/${dto.slug}`,
+      const idea: IdeaIndexItem = mapIdeaPublishDtoToIndexItem({
         authorId: dto.authorId,
         slug: dto.slug,
         title: dto.title,
         summary: dto.summary,
-        date: (dto.createdAt || new Date().toISOString()).slice(0, 10),
         tags: dto.tags ?? validated.payload.tags,
-        idea: {
-          status: statusNormalized,
-          claimedBy: dto.claimedBy ?? undefined,
-          claimPrUrl: dto.claimPrUrl ?? undefined,
-          pending: false,
-        },
-        source: 'supabase',
-      }
+        status: dto.status,
+        createdAt: dto.createdAt || new Date().toISOString(),
+        claimedBy: dto.claimedBy,
+        claimPrUrl: dto.claimPrUrl,
+      })
       setSubmitState({ status: 'success', idea })
       onPublished?.(idea)
       setTimeout(onClose, 1500)

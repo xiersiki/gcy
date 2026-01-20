@@ -2,19 +2,19 @@
 
 import { motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import type { IdeaIndexItem } from '@/models/idea'
 import type { AuthorProfile } from '@/models/content'
-import { readApiData } from '@/shared/api'
-import { BgDecor } from './BgDecor'
+import { BgDecor } from '@/components/shared/BgDecor'
 import { IdeaBoardSection } from './IdeaBoardSection'
 import { IdeaClaimModal } from './IdeaClaimModal'
 import { IdeaCompleteModal } from './IdeaCompleteModal'
 import { IdeaDetailsModal } from './IdeaDetailsModal'
 import { IdeaPublishModal } from './IdeaPublishModal'
 import boardStyles from './IdeaBoardSection.module.scss'
-import styles from './WorksHome.module.scss'
+import styles from '@/components/shared/PageShell.module.scss'
+import { useCommunityIdeas } from './hooks/useCommunityIdeas'
 
 export type IdeasPageContentProps = {
   authors: Record<string, AuthorProfile>
@@ -26,32 +26,7 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isClaimOpen, setIsClaimOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
-  const [communityIdeasRemote, setCommunityIdeasRemote] = useState<IdeaIndexItem[]>(
-    () => initialCommunityIdeas ?? [],
-  )
-
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/ideas/community')
-      .then((r) => readApiData<IdeaIndexItem[]>(r))
-      .then((list) => {
-        if (cancelled) return
-        setCommunityIdeasRemote(Array.isArray(list) ? list : [])
-      })
-      .catch(() => {
-        if (cancelled) return
-        setCommunityIdeasRemote([])
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const communityIdeas = useMemo(() => {
-    const list = [...communityIdeasRemote]
-    list.sort((a, b) => b.date.localeCompare(a.date))
-    return list
-  }, [communityIdeasRemote])
+  const { ideas: communityIdeas, upsertIdea } = useCommunityIdeas(initialCommunityIdeas)
 
   const selectedIdea = useMemo(() => {
     if (!selectedIdeaId) return null
@@ -115,11 +90,7 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
         open={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onPublished={(idea) => {
-          setCommunityIdeasRemote((prev) => {
-            const next = [idea, ...prev.filter((it) => it.id !== idea.id)]
-            next.sort((a, b) => b.date.localeCompare(a.date))
-            return next
-          })
+          upsertIdea(idea)
           setSelectedIdeaId(idea.id)
         }}
       />

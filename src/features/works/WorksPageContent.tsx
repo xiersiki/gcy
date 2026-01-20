@@ -4,9 +4,9 @@ import { motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 
 import type { WorkIndexItem } from '@/models/content'
-import { BgDecor } from './BgDecor'
+import { BgDecor } from '@/components/shared/BgDecor'
 import { WorkCard } from './WorkCard'
-import styles from './WorksHome.module.scss'
+import styles from '@/components/shared/PageShell.module.scss'
 
 export type WorksPageContentProps = {
   works: WorkIndexItem[]
