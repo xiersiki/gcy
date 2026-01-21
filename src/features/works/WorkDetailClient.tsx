@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useEffect, useMemo, useState, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bookmark, Calendar, FileText, Heart, Layout, MessageSquare, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -30,6 +30,22 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
   const { data: stats } = useWorkStats(work.authorId, work.slug)
   const { me, toggleLike, toggleBookmark } = useWorkActions(work.authorId, work.slug)
   const dateLabel = work.meta.date ? new Date(work.meta.date).toLocaleDateString() : ''
+  const [viewportHeight, setViewportHeight] = useState(0)
+
+  useEffect(() => {
+    const onResize = () => setViewportHeight(window.innerHeight)
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const demoHeight = useMemo(() => {
+    const base = work.meta.demo?.height && work.meta.demo.height > 0 ? work.meta.demo.height : 720
+    if (!viewportHeight) return base
+    const chrome = 72 + 24 + 24 + 56
+    const fill = Math.max(640, viewportHeight - chrome)
+    return Math.max(base, Math.min(5000, fill))
+  }, [viewportHeight, work.meta.demo?.height])
 
   return (
     <div className={styles.page}>
@@ -142,7 +158,7 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
                       {demoUrl ? (
                         <DemoFrame
                           src={demoUrl}
-                          height={work.meta.demo?.height || 720}
+                          height={demoHeight}
                           title={`${work.meta.title} Demo`}
                         />
                       ) : (

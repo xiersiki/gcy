@@ -5,12 +5,12 @@ export default function ArticleExample() {
     <CommentScope>
       <article
         style={{
-          maxWidth: 760,
+          maxWidth: 1320,
           margin: '0 auto',
           padding: '24px 16px 120px',
           fontSize: 16,
           lineHeight: 1.75,
-          color: '#111827',
+          color: 'var(--text)',
         }}
       >
         <h1 style={{ fontSize: 28, lineHeight: 1.2, margin: '0 0 16px' }}>
