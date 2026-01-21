@@ -57,7 +57,7 @@ export default function FloatingCommentButton({
     }
   }, [direction, rect, range])
 
-  const { refs, floatingStyles, update, isPositioned, x, y } = useFloating({
+  const { refs, floatingStyles, update } = useFloating({
     strategy: 'fixed',
     placement: direction === 'backward' ? 'top' : 'bottom',
     middleware: [offset(6), flip({ padding: 8 }), shift({ padding: 8 })],
@@ -83,11 +83,7 @@ export default function FloatingCommentButton({
       size="small"
       shape="round"
       style={floatingStyles}
-      className={
-        isPositioned && (Math.abs(x) > 0.5 || Math.abs(y) > 0.5)
-          ? styles.floatingButton
-          : `${styles.floatingButton} ${styles.hidden}`
-      }
+      className={styles.floatingButton}
       onPointerDown={(e) => {
         e.preventDefault()
         e.stopPropagation()
