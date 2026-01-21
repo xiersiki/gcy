@@ -63,7 +63,6 @@ $shadow-xl: var(--shadow-xl);
     transform 0.2s ease;
 
   &:hover {
-    border-color: $primary-color;
     box-shadow: $shadow-md;
     transform: translateY(-1px);
   }

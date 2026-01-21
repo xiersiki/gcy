@@ -27,7 +27,12 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isClaimOpen, setIsClaimOpen] = useState(false)
   const [isCompleteOpen, setIsCompleteOpen] = useState(false)
-  const { ideas: communityIdeas, upsertIdea } = useCommunityIdeas(initialCommunityIdeas)
+  const {
+    ideas: communityIdeas,
+    upsertIdea,
+    refresh,
+    error,
+  } = useCommunityIdeas(initialCommunityIdeas)
 
   const selectedIdea = useMemo(() => {
     if (!selectedIdeaId) return null
@@ -49,6 +54,7 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
               Suggest a component you'd like to see, or claim an existing idea to implement it
               through a Pull Request.
             </p>
+            {error ? <p className={styles.errorText}>{error}</p> : null}
           </div>
           <button
             type="button"
@@ -79,12 +85,18 @@ export function IdeasPageContent({ authors, initialCommunityIdeas }: IdeasPageCo
         idea={selectedIdea}
         authors={authors}
         onClose={() => setIsClaimOpen(false)}
+        onSubmitted={() => {
+          refresh()
+        }}
       />
       <IdeaCompleteModal
         open={isCompleteOpen}
         idea={selectedIdea}
         authors={authors}
         onClose={() => setIsCompleteOpen(false)}
+        onSubmitted={() => {
+          refresh()
+        }}
       />
       <IdeaPublishModal
         authors={authors}

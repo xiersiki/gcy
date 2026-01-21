@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { getSupabaseEnv } from '@/server/supabase/env'
+import { getSupabaseEnv, isLikelyJwtKey } from '@/server/supabase/env'
 import { createSupabaseRouteClient } from '@/server/supabase/route'
 
 export const runtime = 'edge'
@@ -17,6 +17,15 @@ export async function POST(req: Request) {
       },
     )
   }
+  if (!isLikelyJwtKey(anonKey)) {
+    return NextResponse.redirect(
+      new URL(
+        `/login?error=${encodeURIComponent('Supabase Key 配置错误：请使用 Dashboard 的 anon public key（JWT）')}`,
+        origin,
+      ),
+      { status: 302 },
+    )
+  }
 
   const form = await req.formData()
   const email = String(form.get('email') || '').trim()
@@ -29,14 +38,17 @@ export async function POST(req: Request) {
       },
     )
   }
+  if (password.length < 6) {
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent('密码至少 6 位')}`, origin),
+      { status: 302 },
+    )
+  }
 
-  const response = NextResponse.redirect(
-    new URL('/login?success=' + encodeURIComponent('注册成功：请检查邮箱完成验证后再登录'), origin),
-    { status: 302 },
-  )
+  const response = NextResponse.redirect(new URL('/works', origin), { status: 302 })
   const supabase = createSupabaseRouteClient(req, response)
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -44,11 +56,22 @@ export async function POST(req: Request) {
     },
   })
   if (error) {
+    const hint =
+      error.message === 'User already registered'
+        ? '用户已存在：如果忘记密码，请使用“找回密码”重置后登录'
+        : error.message
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(hint)}`, origin), {
+      status: 302,
+    })
+  }
+
+  if (!data.session) {
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error.message)}`, origin),
-      {
-        status: 302,
-      },
+      new URL(
+        '/login?success=' + encodeURIComponent('注册成功：请检查邮箱完成验证后再登录'),
+        origin,
+      ),
+      { status: 302 },
     )
   }
 

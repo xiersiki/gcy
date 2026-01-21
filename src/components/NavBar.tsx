@@ -26,6 +26,7 @@ export function NavBar() {
         <nav className={styles.nav}>
           <Link
             href="/works"
+            prefetch={false}
             className={`${styles.navLink} ${pathname === '/works' ? styles.active : ''}`}
           >
             <LayoutGrid size={18} />
@@ -33,6 +34,7 @@ export function NavBar() {
           </Link>
           <Link
             href="/ideas"
+            prefetch={false}
             className={`${styles.navLink} ${pathname === '/ideas' ? styles.active : ''}`}
           >
             <Lightbulb size={18} />

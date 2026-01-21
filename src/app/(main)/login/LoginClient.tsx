@@ -35,13 +35,20 @@ function LayoutIcon() {
 export function LoginClient({
   initialError,
   initialSuccess,
+  resetMode,
 }: {
   initialError: string
   initialSuccess: string
+  resetMode: boolean
 }) {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login')
+  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'reset'>(
+    resetMode ? 'reset' : 'login',
+  )
   const [signupPassword, setSignupPassword] = useState('')
   const [signupPassword2, setSignupPassword2] = useState('')
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetPassword, setResetPassword] = useState('')
+  const [resetPassword2, setResetPassword2] = useState('')
 
   const notices = useMemo(() => {
     return { error: initialError, success: initialSuccess }
@@ -109,15 +116,18 @@ export function LoginClient({
             <button type="submit" className={styles.submitBtn}>
               Sign In
             </button>
+            <button type="button" className={styles.linkBtn} onClick={() => setActiveTab('reset')}>
+              Forgot password?
+            </button>
           </form>
-        ) : (
+        ) : activeTab === 'signup' ? (
           <form
             action="/auth/password/signup"
             method="post"
             onSubmit={(e) => {
-              if (!signupPassword || signupPassword.length < 8) {
+              if (!signupPassword || signupPassword.length < 6) {
                 e.preventDefault()
-                alert('Password must be at least 8 characters.')
+                alert('Password must be at least 6 characters.')
                 return
               }
               if (signupPassword !== signupPassword2) {
@@ -142,7 +152,7 @@ export function LoginClient({
               <input
                 name="password"
                 type="password"
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 required
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
@@ -164,6 +174,83 @@ export function LoginClient({
               Create Account
             </button>
           </form>
+        ) : (
+          <div className={styles.form}>
+            <form
+              action="/auth/password/reset"
+              method="post"
+              className={styles.form}
+              onSubmit={(e) => {
+                if (!resetEmail.trim()) {
+                  e.preventDefault()
+                  alert('Please enter your email.')
+                }
+              }}
+            >
+              <div className={styles.formGroup}>
+                <label>Email Address</label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className={styles.input}
+                />
+              </div>
+              <button type="submit" className={styles.submitBtn}>
+                Send reset email
+              </button>
+            </form>
+
+            {resetMode ? (
+              <form
+                action="/auth/password/update"
+                method="post"
+                className={styles.form}
+                onSubmit={(e) => {
+                  if (!resetPassword || resetPassword.length < 6) {
+                    e.preventDefault()
+                    alert('Password must be at least 6 characters.')
+                    return
+                  }
+                  if (resetPassword !== resetPassword2) {
+                    e.preventDefault()
+                    alert('Passwords do not match.')
+                  }
+                }}
+              >
+                <div className={styles.formGroup}>
+                  <label>New Password</label>
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="At least 6 characters"
+                    required
+                    value={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    className={styles.input}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Confirm New Password</label>
+                  <input
+                    name="password2"
+                    type="password"
+                    placeholder="Confirm your password"
+                    required
+                    value={resetPassword2}
+                    onChange={(e) => setResetPassword2(e.target.value)}
+                    className={styles.input}
+                  />
+                </div>
+                <button type="submit" className={styles.submitBtn}>
+                  Update password
+                </button>
+              </form>
+            ) : null}
+          </div>
         )}
 
         <div className={styles.footer}>
@@ -174,9 +261,16 @@ export function LoginClient({
                 Create one
               </button>
             </p>
-          ) : (
+          ) : activeTab === 'signup' ? (
             <p>
               Already have an account?
+              <button type="button" onClick={() => setActiveTab('login')}>
+                Sign In
+              </button>
+            </p>
+          ) : (
+            <p>
+              Remembered your password?
               <button type="button" onClick={() => setActiveTab('login')}>
                 Sign In
               </button>

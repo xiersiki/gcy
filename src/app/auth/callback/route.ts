@@ -14,7 +14,9 @@ export async function GET(req: Request) {
   const code = requestUrl.searchParams.get('code')
   if (!code) return new Response('Missing code', { status: 400 })
 
-  const response = NextResponse.redirect(new URL('/works', requestUrl.origin))
+  const next = requestUrl.searchParams.get('next')
+  const safeNext = next && next.startsWith('/') ? next : '/works'
+  const response = NextResponse.redirect(new URL(safeNext, requestUrl.origin))
   const supabase = createSupabaseRouteClient(req, response)
 
   const { error } = await supabase.auth.exchangeCodeForSession(code)

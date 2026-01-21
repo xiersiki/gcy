@@ -12,6 +12,18 @@ pnpm install
 pnpm dev
 ```
 
+## 常见问题
+
+### dev 模式报错：ENOENT edge-runtime-webpack.js
+
+现象：启动后访问页面出现 `ENOENT: no such file or directory, open '.next/server/edge-runtime-webpack.js'`。
+
+处理：
+
+1. 停止 `pnpm dev`
+2. 删除 `.next/`
+3. 重新执行 `pnpm dev`
+
 ## 质量控制
 
 ```bash

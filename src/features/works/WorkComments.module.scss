@@ -1,0 +1,148 @@
+@use '../../styles/theme.scss' as *;
+
+.section {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: $text-main;
+  margin: 0;
+}
+
+.count {
+  font-size: 0.875rem;
+  color: $text-secondary;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.item {
+  background: $surface;
+  border: 1px solid $divider;
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1rem;
+  box-shadow: $shadow-sm;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.author {
+  font-weight: 700;
+  color: $text-main;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  color: $text-muted;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.body {
+  color: $text-secondary;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.form {
+  margin-top: 1rem;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  background: $surface-2;
+  border: 1px solid $divider;
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  color: $text-main;
+  font-family: inherit;
+  font-size: 0.9375rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.btn {
+  background: $primary-color;
+  color: white;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    background: $primary-hover;
+    box-shadow: $shadow-sm;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.loadMore {
+  background: transparent;
+  border: 1px solid $divider;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-weight: 700;
+  color: $text-main;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    background: $surface-2;
+    border-color: $text-muted;
+  }
+}
+
+.hint {
+  color: $text-muted;
+  font-size: 0.875rem;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}

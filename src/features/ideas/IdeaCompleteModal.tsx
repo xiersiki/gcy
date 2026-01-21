@@ -19,9 +19,16 @@ export type IdeaCompleteModalProps = {
   idea: IdeaIndexItem | null
   authors: Record<string, AuthorProfile>
   onClose: () => void
+  onSubmitted?: () => void
 }
 
-export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaCompleteModalProps) {
+export function IdeaCompleteModal({
+  open,
+  idea,
+  authors,
+  onClose,
+  onSubmitted,
+}: IdeaCompleteModalProps) {
   const authorIds = useMemo(
     () => Object.keys(authors).sort((a, b) => a.localeCompare(b)),
     [authors],
@@ -62,6 +69,7 @@ export function IdeaCompleteModal({ open, idea, authors, onClose }: IdeaComplete
       const prUrl = data?.prUrl
       if (!prUrl) throw new Error('Completion successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
+      onSubmitted?.()
     } catch (err) {
       setSubmitState({
         status: 'error',

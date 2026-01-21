@@ -19,9 +19,10 @@ export type IdeaClaimModalProps = {
   idea: IdeaIndexItem | null
   authors: Record<string, AuthorProfile>
   onClose: () => void
+  onSubmitted?: () => void
 }
 
-export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalProps) {
+export function IdeaClaimModal({ open, idea, authors, onClose, onSubmitted }: IdeaClaimModalProps) {
   const authorIds = useMemo(
     () => Object.keys(authors).sort((a, b) => a.localeCompare(b)),
     [authors],
@@ -58,6 +59,7 @@ export function IdeaClaimModal({ open, idea, authors, onClose }: IdeaClaimModalP
       const prUrl = data?.prUrl ?? null
       if (!prUrl) throw new Error('Claim successful but missing PR URL')
       setSubmitState({ status: 'success', prUrl })
+      onSubmitted?.()
     } catch (err) {
       setSubmitState({
         status: 'error',

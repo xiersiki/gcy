@@ -12,9 +12,7 @@ export async function POST(req: Request) {
   if (!url || !anonKey) {
     return NextResponse.redirect(
       new URL(`/login?error=${encodeURIComponent('Supabase 未配置')}`, origin),
-      {
-        status: 302,
-      },
+      { status: 302 },
     )
   }
   if (!isLikelyJwtKey(anonKey)) {
@@ -29,34 +27,28 @@ export async function POST(req: Request) {
 
   const form = await req.formData()
   const email = String(form.get('email') || '').trim()
-  const password = String(form.get('password') || '')
-  if (!email || !password) {
+  if (!email) {
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('请填写邮箱和密码')}`, origin),
-      {
-        status: 302,
-      },
-    )
-  }
-  if (password.length < 6) {
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('密码至少 6 位')}`, origin),
+      new URL(`/login?error=${encodeURIComponent('请填写邮箱')}`, origin),
       { status: 302 },
     )
   }
 
-  const response = NextResponse.redirect(new URL('/works', origin), { status: 302 })
+  const response = NextResponse.redirect(
+    new URL('/login?success=' + encodeURIComponent('已发送重置邮件：请到邮箱完成重置'), origin),
+    { status: 302 },
+  )
   const supabase = createSupabaseRouteClient(req, response)
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent('/login?reset=1')}`,
+  })
   if (error) {
-    const hint =
-      error.message === 'Invalid login credentials'
-        ? '邮箱或密码不正确；如果提示“用户已存在”，可用“找回密码”重置后再登录'
-        : error.message
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(hint)}`, origin), {
-      status: 302,
-    })
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent(error.message)}`, origin),
+      { status: 302 },
+    )
   }
+
   return response
 }

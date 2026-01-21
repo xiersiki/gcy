@@ -12,9 +12,7 @@ export async function POST(req: Request) {
   if (!url || !anonKey) {
     return NextResponse.redirect(
       new URL(`/login?error=${encodeURIComponent('Supabase 未配置')}`, origin),
-      {
-        status: 302,
-      },
+      { status: 302 },
     )
   }
   if (!isLikelyJwtKey(anonKey)) {
@@ -28,19 +26,23 @@ export async function POST(req: Request) {
   }
 
   const form = await req.formData()
-  const email = String(form.get('email') || '').trim()
   const password = String(form.get('password') || '')
-  if (!email || !password) {
+  const password2 = String(form.get('password2') || '')
+  if (!password || !password2) {
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('请填写邮箱和密码')}`, origin),
-      {
-        status: 302,
-      },
+      new URL(`/login?reset=1&error=${encodeURIComponent('请填写两次新密码')}`, origin),
+      { status: 302 },
     )
   }
   if (password.length < 6) {
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('密码至少 6 位')}`, origin),
+      new URL(`/login?reset=1&error=${encodeURIComponent('密码至少 6 位')}`, origin),
+      { status: 302 },
+    )
+  }
+  if (password !== password2) {
+    return NextResponse.redirect(
+      new URL(`/login?reset=1&error=${encodeURIComponent('两次密码不一致')}`, origin),
       { status: 302 },
     )
   }
@@ -48,15 +50,21 @@ export async function POST(req: Request) {
   const response = NextResponse.redirect(new URL('/works', origin), { status: 302 })
   const supabase = createSupabaseRouteClient(req, response)
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) {
-    const hint =
-      error.message === 'Invalid login credentials'
-        ? '邮箱或密码不正确；如果提示“用户已存在”，可用“找回密码”重置后再登录'
-        : error.message
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(hint)}`, origin), {
-      status: 302,
-    })
+  const { data: userData, error: userErr } = await supabase.auth.getUser()
+  if (userErr || !userData.user) {
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent('重置链接已失效：请重新发起找回密码')}`, origin),
+      { status: 302 },
+    )
   }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) {
+    return NextResponse.redirect(
+      new URL(`/login?reset=1&error=${encodeURIComponent(error.message)}`, origin),
+      { status: 302 },
+    )
+  }
+
   return response
 }

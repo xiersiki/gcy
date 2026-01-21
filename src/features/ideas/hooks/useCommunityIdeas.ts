@@ -13,6 +13,7 @@ function sortByDateDesc(list: IdeaIndexItem[]) {
 
 export function useCommunityIdeas(initialIdeas?: IdeaIndexItem[]) {
   const [remoteIdeas, setRemoteIdeas] = useState<IdeaIndexItem[]>(() => initialIdeas ?? [])
+  const [error, setError] = useState<string>('')
 
   const refresh = useCallback(() => {
     let cancelled = false
@@ -21,10 +22,11 @@ export function useCommunityIdeas(initialIdeas?: IdeaIndexItem[]) {
       .then((list) => {
         if (cancelled) return
         setRemoteIdeas(Array.isArray(list) ? list : [])
+        setError('')
       })
       .catch(() => {
         if (cancelled) return
-        setRemoteIdeas([])
+        setError('刷新失败：请稍后重试')
       })
     return () => {
       cancelled = true
@@ -45,5 +47,5 @@ export function useCommunityIdeas(initialIdeas?: IdeaIndexItem[]) {
     })
   }, [])
 
-  return { ideas, refresh, upsertIdea }
+  return { ideas, refresh, upsertIdea, error }
 }
