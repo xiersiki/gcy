@@ -23,29 +23,25 @@ export default function CommentScope({ children }: { children: ReactNode }) {
     // 如果 root 为空（理论上极少发生），直接退出，不绑定事件。
     if (!root) return
 
-    // handleSelectionCommit 表示“用户完成一次选择”的回调：mouseup/touchend 时触发。
-    const handleSelectionCommit = () => {
-      // 读取当前的选区快照：包含 range/text/rect/clientRects。
-      const snapshot = readSelectionSnapshot()
+    let rafId = 0
 
-      // 对快照做规则校验：必须在 root 内、长度够、且不在禁用区域。
+    const syncPendingSelection = () => {
+      const snapshot = readSelectionSnapshot()
       const result = guardSelectionSnapshot(snapshot, root, {
-        // 最小长度阈值：少于 1 个字符就不算有效选区。
         minLength: 1,
-        // 禁用属性名：如果选区落在带该属性的祖先节点内，则不可评论。
         disabledAttribute: 'data-comment-disabled',
       })
+      setPendingSelection(result.ok ? result.snapshot : null)
+    }
 
-      // 如果校验通过，就把有效快照写入 state，后续 UI 会据此显示按钮/抽屉。
-      if (result.ok) {
-        // 保存有效选区快照。
-        setPendingSelection(result.snapshot)
-        // 结束本次处理，避免继续走到“清空”逻辑。
-        return
-      }
-
-      // 校验不通过：清空 pendingSelection，确保 UI 不显示按钮/抽屉入口。
-      setPendingSelection(null)
+    // handleSelectionCommit 表示“用户完成一次选择”的回调：mouseup/touchend 时触发。
+    const handleSelectionCommit = () => {
+      syncPendingSelection()
+      if (rafId) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        syncPendingSelection()
+      })
     }
 
     // 在 root 容器上监听 mouseup：桌面端用户松开鼠标时，表示一次选择完成。
@@ -60,6 +56,7 @@ export default function CommentScope({ children }: { children: ReactNode }) {
       root.removeEventListener('mouseup', handleSelectionCommit)
       // 移除 touchend 监听（注意：这里 removeEventListener 只需要同一个 handler 引用即可）。
       root.removeEventListener('touchend', handleSelectionCommit)
+      if (rafId) cancelAnimationFrame(rafId)
     }
   }, [])
   // 空依赖数组表示：只在首次挂载执行一次，不会每次渲染都重复绑事件。

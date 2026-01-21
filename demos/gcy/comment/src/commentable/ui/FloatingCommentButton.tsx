@@ -1,7 +1,8 @@
 import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react'
 import { Button } from '@arco-design/web-react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import styles from './FloatingCommentButton.module.css'
 
 export type FloatingCommentButtonProps = {
   rect: DOMRect
@@ -56,14 +57,14 @@ export default function FloatingCommentButton({
     }
   }, [direction, rect, range])
 
-  const { refs, floatingStyles, update } = useFloating({
+  const { refs, floatingStyles, update, isPositioned, x, y } = useFloating({
     strategy: 'fixed',
     placement: direction === 'backward' ? 'top' : 'bottom',
     middleware: [offset(6), flip({ padding: 8 }), shift({ padding: 8 })],
     whileElementsMounted: autoUpdate,
   })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     refs.setReference(virtualReference)
     refs.setFloating(floatingElementRef.current)
     update()
@@ -78,27 +79,15 @@ export default function FloatingCommentButton({
       ref={(node) => {
         floatingElementRef.current = node as unknown as HTMLElement | null
       }}
-      htmlType="button"
-      type="text"
+      type="primary"
       size="small"
       shape="round"
-      style={{
-        ...floatingStyles,
-        zIndex: 1000,
-        pointerEvents: 'auto',
-        background: 'rgba(255,255,255,0.96)',
-        color: 'rgba(55,53,47,0.86)',
-        border: '1px solid rgba(15,15,15,0.12)',
-        boxShadow: '0 8px 24px rgba(15,15,15,0.12)',
-        height: 32,
-        padding: '0 12px',
-        fontSize: 13,
-        fontWeight: 600,
-        lineHeight: '32px',
-        borderRadius: 999,
-        WebkitBackdropFilter: 'blur(8px)',
-        backdropFilter: 'blur(8px)',
-      }}
+      style={floatingStyles}
+      className={
+        isPositioned && (Math.abs(x) > 0.5 || Math.abs(y) > 0.5)
+          ? styles.floatingButton
+          : `${styles.floatingButton} ${styles.hidden}`
+      }
       onPointerDown={(e) => {
         e.preventDefault()
         e.stopPropagation()

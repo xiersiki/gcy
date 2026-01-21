@@ -1,0 +1,11 @@
+.floatingButton:global(.arco-btn) {
+  z-index: 1000;
+  pointer-events: auto;
+  will-change: transform;
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+}
+
+.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
