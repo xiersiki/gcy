@@ -12,6 +12,14 @@ export type AuthorProfile = {
 
 export type WorkType = 'case-study' | 'idea' | 'demo' | 'snippet'
 
+export type WorkDifficulty = 'beginner' | 'intermediate' | 'advanced'
+
+export type WorkFilterState = {
+  category: string
+  featured: boolean
+  difficulty: 'all' | WorkDifficulty
+}
+
 export type WorkDemo = {
   kind: 'iframe'
   src: string
@@ -24,6 +32,10 @@ export type WorkMeta = {
   summary: string
   type: WorkType
   date: string
+  locale?: 'zh' | 'en'
+  readingTime?: number
+  featured?: boolean
+  difficulty?: WorkDifficulty
   tags?: string[]
   category?: string
   cover?: string

@@ -27,7 +27,8 @@
     "content:build": "node scripts/content/build.mjs",
     "content:validate": "node scripts/content/validate.mjs",
     "demos:build": "pnpm -r --filter \"./demos/**\" run build",
-    "pages:build": "pnpm content:build && pnpm demos:build && node scripts/build/sync-public-demos.mjs && npx @cloudflare/next-on-pages"
+    "pages:build": "pnpm content:build && pnpm demos:build && node scripts/build/sync-public-demos.mjs && npx @cloudflare/next-on-pages",
+    "bundle:check": "node scripts/ci/check-bundle-budget.mjs"
   },
   "lint-staged": {
     "*": [

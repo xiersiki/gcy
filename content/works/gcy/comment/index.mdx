@@ -1,3 +1,38 @@
 # Comment Work
 
-这里可以写 comment 的实现思路、交互说明与注意事项。
+## 背景与目标
+
+这个作品聚焦在“正文内评论”场景。传统评论系统通常绑定在页面底部，无法精准指向具体语句，导致沟通成本高。这个 demo 的目标是验证一种前端可落地方案：用户在文档内选中文本后，直接创建与该片段绑定的评论线程，并在后续阅读中稳定定位。
+
+## 方案与取舍
+
+核心设计分为三层：选择捕获、锚点序列化、线程展示。选择捕获通过 Selection API 监听并限制在 CommentScope 内；锚点序列化使用文本上下文和位置组合，避免仅依赖绝对偏移导致的脆弱性；线程展示采用轻量面板，优先保证快速浏览与回帖。取舍上没有引入富文本编辑器内核，而是先通过可维护的 plain-text 评论链路跑通交互。
+
+## 实现细节
+
+在实现里，`SelectionEngine` 负责校验合法选区，`AnchorSerializer` 负责持久化位置信息，`AnchorResolver` 在重渲染后恢复锚点。UI 层使用浮动按钮触发评论创建，面板侧展示线程并支持追加回复。为了避免布局变化导致高亮错位，渲染层按帧节流计算高亮块，并在容器 resize 时触发重算。
+
+## 结果与验证
+
+该 demo 在长文档与多段落场景下能稳定创建和回显评论，评论线程操作保持可预期。通过本地手测，核心交互路径（选中、发帖、重开页面、再次定位）均可完成。性能上采用节流和懒更新后，高亮重绘开销可控，滚动时没有明显卡顿。
+
+## 下一步
+
+下一步会补充权限和协作语义，例如已解决、待跟进、@提醒；同时增加服务端持久化适配，支持多人并发评论。还会探索与作品详情页的评论统计联动，形成内容生产到讨论沉淀的闭环。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

@@ -1,0 +1,49 @@
+# URL State Sync Snippet
+
+## 背景与目标
+
+筛选页如果只用内存状态，刷新后会丢失上下文，也不利于分享。这个片段目标是把筛选条件映射到 URL 查询参数，保证刷新可恢复、链接可分享，同时不引入额外状态管理库。
+
+## 方案与取舍
+
+实现采用“URL 作为单一事实源”的思路：初始化从 query 读取，更新时写回 query。相比双写策略，这样更容易避免状态漂移。取舍是需要处理参数解析、默认值和无效值兜底。
+
+## 实现细节
+
+```ts
+export function syncQueryParam(url: URL, key: string, value?: string) {
+  if (!value) {
+    url.searchParams.delete(key)
+  } else {
+    url.searchParams.set(key, value)
+  }
+  return url
+}
+```
+
+在 Next.js 场景里，建议结合 `useSearchParams` 和 `router.replace`，避免每次筛选都创建新历史记录。对于枚举值，应在读取阶段做白名单校验，防止非法值污染页面状态。
+
+## 结果与验证
+
+接入后，作品页筛选状态能够在刷新后恢复，分享链接也能直接还原视图。用户在跨页面切换后返回时，操作上下文保持一致，减少重复点击。
+
+## 下一步
+
+后续会加一个小型 hook 把解析、序列化和默认值处理封装起来，并补充测试覆盖多参数联动场景。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

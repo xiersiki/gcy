@@ -2,7 +2,7 @@ import { CommentScope } from '../../commentable'
 
 export default function ArticleExample() {
   return (
-    <CommentScope>
+    <CommentScope mode="side">
       <article
         style={{
           maxWidth: 1320,

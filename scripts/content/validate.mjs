@@ -39,6 +39,10 @@ const WorkMetaSchema = z
     summary: z.string().min(1),
     type: WorkTypeSchema,
     date: z.string().min(1),
+    locale: z.enum(['zh', 'en']).optional(),
+    readingTime: z.number().int().positive().optional(),
+    featured: z.boolean().optional(),
+    difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
     tags: z.array(z.string().min(1)).optional(),
     category: z.string().optional(),
     cover: z.string().optional(),
@@ -53,6 +57,54 @@ const WorkMetaSchema = z
       .optional(),
   })
   .strict()
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const KEBAB_TAG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const CATEGORY_ALLOWLIST = ['Web App', 'Case Study', 'Snippet', 'Engineering']
+const SUMMARY_MIN_HARD = 20
+const SUMMARY_MIN_SOFT = 40
+const MDX_TEXT_MIN_HARD = 180
+const MDX_TEXT_MIN_SOFT = 320
+
+function extractMdxPlainText(raw) {
+  return raw
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[#[\]*_>!-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function validateWorkMetaRules(meta, relMetaPath) {
+  if (!ISO_DATE_RE.test(meta.date)) {
+    throw new Error(`Invalid date format (YYYY-MM-DD): ${relMetaPath}`)
+  }
+  if (meta.tags?.length) {
+    const deduped = new Set(meta.tags)
+    if (deduped.size !== meta.tags.length) {
+      throw new Error(`Duplicate tags are not allowed: ${relMetaPath}`)
+    }
+    const invalidTag = meta.tags.find((tag) => !KEBAB_TAG_RE.test(tag))
+    if (invalidTag) {
+      throw new Error(`Invalid tag "${invalidTag}" (use kebab-case): ${relMetaPath}`)
+    }
+  }
+  if (meta.category && !CATEGORY_ALLOWLIST.includes(meta.category)) {
+    throw new Error(
+      `Invalid category "${meta.category}" (allowed: ${CATEGORY_ALLOWLIST.join(', ')}): ${relMetaPath}`,
+    )
+  }
+  const summaryLength = (meta.summary || '').trim().length
+  if (summaryLength < SUMMARY_MIN_HARD) {
+    throw new Error(`Summary is too short (<${SUMMARY_MIN_HARD} chars): ${relMetaPath}`)
+  }
+  if (summaryLength < SUMMARY_MIN_SOFT) {
+    console.warn(
+      `[content:validate] warning: summary is short (<${SUMMARY_MIN_SOFT} chars): ${relMetaPath}`,
+    )
+  }
+}
 
 async function pathExists(filePath) {
   try {
@@ -72,6 +124,12 @@ async function listChildDirectories(dirPath) {
   if (!(await pathExists(dirPath))) return []
   const entries = await fs.readdir(dirPath, { withFileTypes: true })
   return entries.filter((e) => e.isDirectory()).map((e) => e.name)
+}
+
+function warnSkippedIncompleteWork(authorId, slug) {
+  console.warn(
+    `[content:validate] warning: skipped incomplete work directory (missing meta.yml and index.mdx): content/works/${authorId}/${slug}`,
+  )
 }
 
 function assertNoDuplicateIds(ids, label) {
@@ -112,13 +170,32 @@ async function validate() {
       const baseDir = path.join(worksRoot, authorId, slug)
       const metaPath = path.join(baseDir, 'meta.yml')
       const mdxPath = path.join(baseDir, 'index.mdx')
-      if (!(await pathExists(metaPath))) {
+      const hasMeta = await pathExists(metaPath)
+      const hasMdx = await pathExists(mdxPath)
+      if (!hasMeta && !hasMdx) {
+        warnSkippedIncompleteWork(authorId, slug)
+        continue
+      }
+      if (!hasMeta) {
         throw new Error(`Missing work meta.yml: ${path.relative(repoRoot, metaPath)}`)
       }
-      if (!(await pathExists(mdxPath))) {
+      if (!hasMdx) {
         throw new Error(`Missing work index.mdx: ${path.relative(repoRoot, mdxPath)}`)
       }
-      WorkMetaSchema.parse(await readYamlFile(metaPath))
+      const meta = WorkMetaSchema.parse(await readYamlFile(metaPath))
+      validateWorkMetaRules(meta, path.relative(repoRoot, metaPath))
+      const mdxRaw = await fs.readFile(mdxPath, 'utf8')
+      const mdxTextLength = extractMdxPlainText(mdxRaw).length
+      if (mdxTextLength < MDX_TEXT_MIN_HARD) {
+        throw new Error(
+          `MDX content is too short (<${MDX_TEXT_MIN_HARD} chars): ${path.relative(repoRoot, mdxPath)}`,
+        )
+      }
+      if (mdxTextLength < MDX_TEXT_MIN_SOFT) {
+        console.warn(
+          `[content:validate] warning: MDX content is short (<${MDX_TEXT_MIN_SOFT} chars): ${path.relative(repoRoot, mdxPath)}`,
+        )
+      }
       workIds.push(`${authorId}/${slug}`)
     }
   }

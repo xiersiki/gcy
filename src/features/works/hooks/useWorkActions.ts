@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
+import { isApiRequestError, requestApiData } from '@/shared/api'
+import { useApiResource } from '@/shared/useApiResource'
 import { mutateWorkStats, revalidateWorkStats } from './useWorkStats'
 
 type WorkMe = {
@@ -18,32 +20,28 @@ export function useWorkActions(authorId: string, slug: string) {
     [authorId, slug],
   )
 
-  const [me, setMe] = useState<WorkMe | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    fetch(`${base}/me`)
-      .then(async (res) => {
-        if (res.status === 401) return null
-        if (!res.ok) throw new Error(String(res.status))
-        const json = (await res.json()) as { ok: true; data: WorkMe }
-        return json.data
-      })
-      .then((data) => {
-        if (cancelled) return
-        setMe(data)
-        setLoading(false)
-      })
-      .catch(() => {
-        if (cancelled) return
-        setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [base])
+  const {
+    data: me,
+    loading,
+    setData: setMeData,
+  } = useApiResource<WorkMe | null>(
+    base,
+    async ({ signal }) => {
+      try {
+        return await requestApiData<WorkMe>(`${base}/me`, { signal })
+      } catch (error) {
+        if (isApiRequestError(error) && error.status === 401) return null
+        throw error
+      }
+    },
+    { immediate: true },
+  )
+  const [liking, setLiking] = useState(false)
+  const [bookmarking, setBookmarking] = useState(false)
+  const likingRef = useRef(false)
+  const bookmarkingRef = useRef(false)
+  const likeTokenRef = useRef(0)
+  const bookmarkTokenRef = useRef(0)
 
   const requireLogin = () => {
     const next = pathname ? `?next=${encodeURIComponent(pathname)}` : ''
@@ -51,68 +49,96 @@ export function useWorkActions(authorId: string, slug: string) {
   }
 
   const toggleLike = async () => {
+    if (likingRef.current) return
     if (!me) return requireLogin()
+    likingRef.current = true
+    setLiking(true)
+    likeTokenRef.current += 1
+    const token = likeTokenRef.current
     const prev = me
     const nextLiked = !me.liked
-    setMe({ ...me, liked: nextLiked })
+    setMeData(() => ({ ...me, liked: nextLiked }))
     mutateWorkStats(authorId, slug, (s) => ({
       ...s,
       likeCount: Math.max(0, s.likeCount + (nextLiked ? 1 : -1)),
     }))
     try {
-      const res = await fetch(`${base}/like`, { method: nextLiked ? 'POST' : 'DELETE' })
-      if (res.status === 401) {
-        setMe(null)
+      await requestApiData<{ liked: boolean }>(`${base}/like`, {
+        method: nextLiked ? 'POST' : 'DELETE',
+      })
+      void revalidateWorkStats(authorId, slug).catch(() => {})
+    } catch (error) {
+      if (isApiRequestError(error) && error.status === 401) {
+        setMeData(() => null)
         mutateWorkStats(authorId, slug, (s) => ({
           ...s,
           likeCount: Math.max(0, s.likeCount + (nextLiked ? -1 : 1)),
         }))
         return requireLogin()
       }
-      if (!res.ok) throw new Error(String(res.status))
-      void revalidateWorkStats(authorId, slug).catch(() => {})
-    } catch {
-      setMe(prev)
+      if (likeTokenRef.current === token) {
+        setMeData(() => prev)
+      }
       mutateWorkStats(authorId, slug, (s) => ({
         ...s,
         likeCount: Math.max(0, s.likeCount + (nextLiked ? -1 : 1)),
       }))
+    } finally {
+      if (likeTokenRef.current === token) {
+        likingRef.current = false
+        setLiking(false)
+      }
     }
   }
 
   const toggleBookmark = async () => {
+    if (bookmarkingRef.current) return
     if (!me) return requireLogin()
+    bookmarkingRef.current = true
+    setBookmarking(true)
+    bookmarkTokenRef.current += 1
+    const token = bookmarkTokenRef.current
     const prev = me
     const nextBookmarked = !me.bookmarked
-    setMe({ ...me, bookmarked: nextBookmarked })
+    setMeData(() => ({ ...me, bookmarked: nextBookmarked }))
     mutateWorkStats(authorId, slug, (s) => ({
       ...s,
       bookmarkCount: Math.max(0, s.bookmarkCount + (nextBookmarked ? 1 : -1)),
     }))
     try {
-      const res = await fetch(`${base}/bookmark`, { method: nextBookmarked ? 'POST' : 'DELETE' })
-      if (res.status === 401) {
-        setMe(null)
+      await requestApiData<{ bookmarked: boolean }>(`${base}/bookmark`, {
+        method: nextBookmarked ? 'POST' : 'DELETE',
+      })
+      void revalidateWorkStats(authorId, slug).catch(() => {})
+    } catch (error) {
+      if (isApiRequestError(error) && error.status === 401) {
+        setMeData(() => null)
         mutateWorkStats(authorId, slug, (s) => ({
           ...s,
           bookmarkCount: Math.max(0, s.bookmarkCount + (nextBookmarked ? -1 : 1)),
         }))
         return requireLogin()
       }
-      if (!res.ok) throw new Error(String(res.status))
-      void revalidateWorkStats(authorId, slug).catch(() => {})
-    } catch {
-      setMe(prev)
+      if (bookmarkTokenRef.current === token) {
+        setMeData(() => prev)
+      }
       mutateWorkStats(authorId, slug, (s) => ({
         ...s,
         bookmarkCount: Math.max(0, s.bookmarkCount + (nextBookmarked ? -1 : 1)),
       }))
+    } finally {
+      if (bookmarkTokenRef.current === token) {
+        bookmarkingRef.current = false
+        setBookmarking(false)
+      }
     }
   }
 
   return {
     me,
     loading,
+    liking,
+    bookmarking,
     toggleLike,
     toggleBookmark,
   }

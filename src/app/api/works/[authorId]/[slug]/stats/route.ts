@@ -6,7 +6,12 @@ import { getRequestId } from '@/server/api/request'
 import { jsonError, jsonOk } from '@/server/api/response'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 
-import { ensureSupabaseConfigured, getWorkContext } from '../_shared'
+import {
+  ensureSupabaseConfigured,
+  getWorkContext,
+  withRequestIdHeaders,
+  workNotFoundError,
+} from '../_shared'
 
 export async function GET(
   req: Request,
@@ -18,10 +23,7 @@ export async function GET(
   if (supabaseNotConfigured) return supabaseNotConfigured
 
   const { workId, work } = await getWorkContext(ctx.params)
-  if (!work)
-    return jsonError(ApiErrorCode.NotFound, '作品不存在', 404, {
-      headers: { 'x-request-id': requestId },
-    })
+  if (!work) return workNotFoundError(requestId)
 
   const supabase = await getSupabaseServerClient()
   const { data, error } = await supabase
@@ -32,7 +34,7 @@ export async function GET(
 
   if (error)
     return jsonError(ApiErrorCode.SupabaseError, error.message, 500, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
 
   const payload = {
@@ -42,9 +44,8 @@ export async function GET(
   }
 
   return jsonOk(payload, {
-    headers: {
-      'x-request-id': requestId,
+    headers: withRequestIdHeaders(requestId, {
       'cache-control': 'public, s-maxage=60, stale-while-revalidate=300',
-    },
+    }),
   })
 }

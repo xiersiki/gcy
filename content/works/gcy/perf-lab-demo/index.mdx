@@ -1,0 +1,38 @@
+# Perf Lab Demo
+
+## 背景与目标
+
+在作品站中，长列表是最常见的性能风险来源。本 demo 用一个可调节数据量的列表实验台，展示普通渲染和虚拟列表渲染的差异，目标是为后续业务页面提供“可解释、可复现”的性能对比样本。
+
+## 方案与取舍
+
+方案选择了“固定行高 + 视窗切片”的虚拟列表实现，优先强调可读性和教学价值，而不是追求极限性能。相比引入复杂库，这种实现更利于新人理解关键原理。代价是对动态高度项支持较弱，需要后续加缓存和回填策略。
+
+## 实现细节
+
+核心逻辑包括：根据滚动位置计算起止索引、在容器内通过占位块维持滚动条高度、只渲染可见区及缓冲区条目。监控面板实时显示渲染节点数、平均帧时间和交互延迟。通过 requestAnimationFrame 节流滚动计算，避免高频事件下的重复布局测量。
+
+## 结果与验证
+
+在 5000 条数据场景下，普通渲染会出现明显掉帧，虚拟列表保持更稳定的滚动体验。监控指标显示可见节点维持在一个常量级范围，交互响应显著改善。这个 demo 证明了在作品库中提供性能实验内容的必要性。
+
+## 下一步
+
+后续会加入动态行高场景，验证高度缓存和惰性测量策略；同时补充 React 版本实现，形成原生与框架两种视角的对照案例。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

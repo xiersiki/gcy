@@ -1,3 +1,38 @@
 # Demo Work 2
 
-这里可以放更多图文解释，也可以嵌入受控的交互组件（后续接入）。
+## 背景与目标
+
+这个作品用于验证“独立 demo + 主站 iframe 承载”的基础模式。目标不是复杂交互，而是把最小可复用链路跑通：独立包开发、构建后被主站静态资源托管、在详情页自动适配高度并保持操作反馈。
+
+## 方案与取舍
+
+方案上采用 Vite 单包构建，主站通过 `DemoFrame` 挂载。与直接在 Next 页面内写交互相比，这种方式隔离性更好，适合后续把不同技术栈 demo 并存。代价是需要处理 iframe 通信和高度同步，但这部分可以沉淀成统一协议。
+
+## 实现细节
+
+demo 内通过 `postMessage` 发送 `demo:resize` 事件，父页面根据消息动态更新容器高度。计数器和滑块分别代表离散状态与连续状态两种常见交互。通过 `ResizeObserver` 监听内容变化，避免仅依赖窗口 resize 导致漏更新。
+
+## 结果与验证
+
+在本地开发和构建产物中，demo 均可正常加载并完成交互。主站详情页在切换标签页后重新回到预览时，iframe 内容保持稳定。这个样例验证了后续大规模新增 demo 的基础工程能力。
+
+## 下一步
+
+后续会扩展成模板化 demo 初始化脚手架，统一包名、端口、样式基线和通信协议。这样在新增作品时可以把精力集中在内容和交互本身，而不是重复处理基础工程细节。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

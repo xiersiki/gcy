@@ -20,7 +20,7 @@ export function LandingSection() {
           transition={{ duration: 0.6 }}
         >
           <Sparkles size={16} />
-          <span>Community Driven</span>
+          <span>内容驱动 · 持续迭代</span>
         </motion.div>
         <motion.h1
           className={styles.title}
@@ -28,7 +28,7 @@ export function LandingSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Build the <span className={styles.gradientText}>Future</span> together.
+          用作品沉淀 <span className={styles.gradientText}>可复用经验</span>
         </motion.h1>
         <motion.p
           className={styles.subtitle}
@@ -36,8 +36,8 @@ export function LandingSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          The showcase for the world's most innovative web components. Propose ideas, accept
-          challenges, and see your code come to life in our global gallery.
+          这里是 GCY 的前端作品集：从想法到实现，从 demo 到 case study，记录每一次交互设计、
+          工程取舍与复盘结果，形成可持续演进的内容资产。
         </motion.p>
         <motion.div
           className={styles.heroActions}
@@ -46,11 +46,11 @@ export function LandingSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Link href="/works" className={styles.primaryBtn}>
-            Explore Works
+            浏览作品
             <ArrowRight size={20} strokeWidth={2.5} />
           </Link>
           <Link href="/ideas" className={styles.secondaryBtn}>
-            Contribute Ideas
+            查看想法池
           </Link>
         </motion.div>
       </section>

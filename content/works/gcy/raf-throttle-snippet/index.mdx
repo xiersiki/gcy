@@ -1,0 +1,56 @@
+# RAF Throttle Snippet
+
+## 背景与目标
+
+在高频事件中直接执行回调会造成主线程压力。这个片段提供一个轻量的 rAF 节流器，把同一帧内的多次触发合并为一次执行，适合滚动、拖拽和窗口 resize 场景。
+
+## 方案与取舍
+
+相比基于 `setTimeout` 的节流，rAF 节流更贴近浏览器绘制节奏，视觉反馈更平滑。取舍是它不适合后台任务和低频精确定时，主要用于 UI 更新链路。
+
+## 实现细节
+
+```ts
+export function rafThrottle<T extends (...args: any[]) => void>(fn: T) {
+  let frame = 0
+  let latestArgs: Parameters<T> | null = null
+
+  return (...args: Parameters<T>) => {
+    latestArgs = args
+    if (frame) return
+    frame = requestAnimationFrame(() => {
+      frame = 0
+      if (!latestArgs) return
+      fn(...latestArgs)
+      latestArgs = null
+    })
+  }
+}
+```
+
+在使用时要注意组件卸载阶段取消未执行帧，避免闭包引用过期状态。
+
+## 结果与验证
+
+这个片段已经在评论高亮计算和列表滚动处理中复用，能够稳定减少重复计算次数，且对代码侵入较低。
+
+## 下一步
+
+后续会补充 TypeScript 更严格的参数约束版本，并提供可取消/可立即执行模式，覆盖更多业务需求。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

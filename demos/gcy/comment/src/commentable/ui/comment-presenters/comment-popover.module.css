@@ -1,0 +1,11 @@
+.popover {
+  width: min(420px, calc(100vw - 24px));
+  max-height: min(70vh, 640px);
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+  z-index: 1100;
+}

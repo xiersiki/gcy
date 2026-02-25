@@ -1,0 +1,44 @@
+# Portfolio Content Pipeline Case
+
+## 背景与目标
+
+作品站的长期价值取决于内容更新效率和稳定性。项目早期虽然已经有 YAML + MDX 结构，但缺乏严格约束，容易出现字段不一致、标签混乱、正文过短等问题。这个 case 的目标是构建一条可扩展的内容流水线，让新增内容既快又稳。
+
+## 方案与取舍
+
+我选择在构建前后都加校验：`content:validate` 负责快速反馈，`content:build` 负责最终把关并生成索引。与只在 CI 做静态检查相比，双阶段方案能更早暴露问题。代价是脚本复杂度上升，但对多人协作更友好。
+
+## 实现细节
+
+流水线包含三步：
+
+1. 读取 `content/authors` 与 `content/works`，校验目录和 id 一致性。
+2. 使用 zod 约束 meta 字段，并追加日期、标签、分类、长度等业务规则。
+3. 生成 `src/generated/content.ts`，提供 `worksList`、`tagsIndex`、`categories` 给页面直接消费。
+
+为了避免“结构正确但内容空洞”，校验规则加入了 summary 与 MDX 长度阈值，同时对标签命名做 kebab-case 限制，减少后续聚合混乱。
+
+## 结果与验证
+
+改造后，内容提交的错误反馈更明确，页面聚合结果更稳定。新增作品可以直接被分类和标签页识别，不需要手工补丁。这个流程已经满足单作者高频迭代，并能平滑扩展到多作者协作。
+
+## 下一步
+
+后续计划加入内容质量评分和失效链接巡检，并把部分规则抽成可复用测试，确保每次调整不会破坏生成产物。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

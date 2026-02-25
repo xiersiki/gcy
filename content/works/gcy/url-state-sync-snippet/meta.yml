@@ -1,0 +1,16 @@
+title: URL State Sync Snippet
+summary: 将页面筛选状态与 URL 查询参数同步的可复用片段，支持刷新恢复和可分享链接。
+type: snippet
+date: 2026-01-30
+locale: zh
+readingTime: 5
+featured: false
+difficulty: intermediate
+tags:
+  - snippet
+  - url-state
+  - routing
+  - usability
+category: Snippet
+external:
+  repoUrl: https://github.com/bytedance/gcy

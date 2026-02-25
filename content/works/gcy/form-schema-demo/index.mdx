@@ -1,0 +1,38 @@
+# Form Schema Demo
+
+## 背景与目标
+
+复杂表单通常会出现配置散落、校验重复和联动难维护的问题。本 demo 目标是用一个轻量 schema 描述字段、规则和联动关系，再由运行时统一渲染与校验，降低新增字段时的维护成本。
+
+## 方案与取舍
+
+方案选择“schema + renderer + validator”三层结构。schema 负责声明字段与约束，renderer 负责 UI，validator 负责同步与异步校验。与直接手写表单相比，这种方式在中后台场景扩展性更好，但在极端个性化布局中需要 escape hatch 支持。
+
+## 实现细节
+
+实现中将字段定义标准化为 id、type、label、rules、deps。联动逻辑通过依赖图触发重算，避免每次输入全量计算。错误提示采用字段级即时反馈和提交级汇总双通道，兼顾录入效率与整体可读性。为了保证类型安全，schema 与提交 payload 使用同一套 TypeScript 类型映射。
+
+## 结果与验证
+
+在测试用例中，新增字段只需要补 schema 条目即可完成渲染和校验接入。联动项在高频输入下保持稳定，没有出现状态污染。这个 demo 为后续 idea 提到的“表单生成器”提供了可执行基线。
+
+## 下一步
+
+下一步计划接入远程 schema 下发和版本管理，并补充字段级性能监控，评估在超大表单中的渲染开销。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

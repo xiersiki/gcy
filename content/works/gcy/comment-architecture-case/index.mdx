@@ -1,0 +1,43 @@
+# Comment Architecture Case
+
+## 背景与目标
+
+Comment 系统最初只是一个交互原型，只覆盖了本地状态和单人流程。随着功能扩展到锚点恢复、线程列表、权限状态和服务端同步，原有实现开始出现耦合和边界模糊。这个 case study 目标是系统化复盘：哪些设计支撑了增长，哪些决定带来了长期成本。
+
+## 方案与取舍
+
+架构上最终拆分为四层：核心算法层（selection/anchor）、状态层（store/actions）、适配层（repository）、UI 层（provider/panel/highlight）。这样拆分能明确职责并提升测试粒度。对比方案是“以组件为中心组织全部逻辑”，前期开发快，但在并发状态和复用上会失控。
+
+## 实现细节
+
+关键优化点包括：
+
+- 锚点模型从单一偏移升级为文本上下文 + 结构定位，减少文档变更后的失效率。
+- 状态变更统一通过 action 触发，UI 不直接改写底层状态，降低竞态风险。
+- 本地存储适配器与远端仓储接口统一为 repository 协议，便于切换实现。
+- 评论面板从抽屉样式重构为轻量可组合面板，提升不同页面复用效率。
+
+## 结果与验证
+
+改造后，核心模块更容易单测，回归成本明显下降。功能上支持了更完整的线程操作，并为后续多人协作打下基础。最重要的是，架构边界明确后，新增功能可以按层演进，不再需要跨文件大规模重写。
+
+## 下一步
+
+下一步会引入冲突处理策略和审计日志能力，支持多人并发评论。还会补充跨版本锚点迁移机制，确保历史评论在文档更新后仍能可读。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

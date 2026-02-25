@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState, ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Bookmark, Calendar, FileText, Heart, Layout, MessageSquare, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { DemoFrame } from '@/components/demo/DemoFrame'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import type { AuthorProfile, WorkMeta } from '@/models/content'
@@ -24,11 +23,22 @@ export type WorkDetailClientProps = {
   demoUrl?: string
 }
 
+export type WorkDetailTab = 'preview' | 'docs' | 'comments'
+
+export function parseWorkDetailTab(value: string | null): WorkDetailTab {
+  return value === 'docs' || value === 'comments' ? value : 'preview'
+}
+
 export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDetailClientProps) {
-  const [activeTab, setActiveTab] = useState<'preview' | 'docs' | 'comments'>('preview')
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const activeTab = parseWorkDetailTab(searchParams?.get('tab') ?? null)
   const { data: stats } = useWorkStats(work.authorId, work.slug)
-  const { me, toggleLike, toggleBookmark } = useWorkActions(work.authorId, work.slug)
+  const { me, toggleLike, toggleBookmark, liking, bookmarking } = useWorkActions(
+    work.authorId,
+    work.slug,
+  )
   const dateLabel = work.meta.date ? new Date(work.meta.date).toLocaleDateString() : ''
   const [viewportHeight, setViewportHeight] = useState(0)
 
@@ -46,6 +56,17 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
     const fill = Math.max(640, viewportHeight - chrome)
     return Math.max(base, Math.min(5000, fill))
   }, [viewportHeight, work.meta.demo?.height])
+
+  const switchTab = (nextTab: WorkDetailTab) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() ?? '')
+    if (nextTab === 'preview') {
+      nextParams.delete('tab')
+    } else {
+      nextParams.set('tab', nextTab)
+    }
+    const query = nextParams.toString()
+    router.replace(query ? `${pathname ?? ''}?${query}` : (pathname ?? ''), { scroll: false })
+  }
 
   return (
     <div className={styles.page}>
@@ -83,6 +104,7 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
                 onClick={toggleLike}
                 aria-label="Like"
                 aria-pressed={Boolean(me?.liked)}
+                disabled={liking}
               >
                 <Heart size={18} fill={me?.liked ? 'currentColor' : 'none'} />
               </button>
@@ -92,6 +114,7 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
                 onClick={toggleBookmark}
                 aria-label="Bookmark"
                 aria-pressed={Boolean(me?.bookmarked)}
+                disabled={bookmarking}
               >
                 <Bookmark size={18} />
               </button>
@@ -115,27 +138,39 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
           <section className={styles.primary}>
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <div className={styles.tabs}>
+                <div className={styles.tabs} role="tablist" aria-label="作品详情标签页">
                   <button
+                    id="work-tab-preview"
                     type="button"
                     className={`${styles.tab} ${activeTab === 'preview' ? styles.active : ''}`}
-                    onClick={() => setActiveTab('preview')}
+                    onClick={() => switchTab('preview')}
+                    role="tab"
+                    aria-selected={activeTab === 'preview'}
+                    aria-controls="work-tab-panel"
                   >
                     <Layout size={18} />
                     <span>作品预览</span>
                   </button>
                   <button
+                    id="work-tab-docs"
                     type="button"
                     className={`${styles.tab} ${activeTab === 'docs' ? styles.active : ''}`}
-                    onClick={() => setActiveTab('docs')}
+                    onClick={() => switchTab('docs')}
+                    role="tab"
+                    aria-selected={activeTab === 'docs'}
+                    aria-controls="work-tab-panel"
                   >
                     <FileText size={18} />
                     <span>技术文档</span>
                   </button>
                   <button
+                    id="work-tab-comments"
                     type="button"
                     className={`${styles.tab} ${activeTab === 'comments' ? styles.active : ''}`}
-                    onClick={() => setActiveTab('comments')}
+                    onClick={() => switchTab('comments')}
+                    role="tab"
+                    aria-selected={activeTab === 'comments'}
+                    aria-controls="work-tab-panel"
                   >
                     <MessageSquare size={18} />
                     <span>评论</span>
@@ -145,53 +180,45 @@ export function WorkDetailClient({ work, author, mdxContent, demoUrl }: WorkDeta
               </div>
 
               <div className={styles.cardBody}>
-                <AnimatePresence mode="wait">
-                  {activeTab === 'preview' ? (
-                    <motion.div
-                      key="preview"
-                      initial={{ opacity: 0, scale: 0.985 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.985 }}
-                      transition={{ duration: 0.25 }}
-                      className={styles.previewContainer}
-                    >
-                      {demoUrl ? (
-                        <DemoFrame
-                          src={demoUrl}
-                          height={demoHeight}
-                          title={`${work.meta.title} Demo`}
-                        />
-                      ) : (
-                        <div className={styles.noPreview}>
-                          <Layout size={40} />
-                          <p>该作品暂无预览</p>
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : activeTab === 'docs' ? (
-                    <motion.div
-                      key="docs"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className={styles.docsWrapper}
-                    >
-                      <article className={styles.prose}>{mdxContent}</article>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="comments"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className={styles.commentsPanel}
-                    >
-                      <WorkComments authorId={work.authorId} slug={work.slug} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {activeTab === 'preview' ? (
+                  <div
+                    id="work-tab-panel"
+                    role="tabpanel"
+                    aria-labelledby={`work-tab-${activeTab}`}
+                    className={styles.previewContainer}
+                  >
+                    {demoUrl ? (
+                      <DemoFrame
+                        src={demoUrl}
+                        height={demoHeight}
+                        title={`${work.meta.title} Demo`}
+                      />
+                    ) : (
+                      <div className={styles.noPreview}>
+                        <Layout size={40} />
+                        <p>该作品暂无预览</p>
+                      </div>
+                    )}
+                  </div>
+                ) : activeTab === 'docs' ? (
+                  <div
+                    id="work-tab-panel"
+                    role="tabpanel"
+                    aria-labelledby={`work-tab-${activeTab}`}
+                    className={styles.docsWrapper}
+                  >
+                    <article className={styles.prose}>{mdxContent}</article>
+                  </div>
+                ) : (
+                  <div
+                    id="work-tab-panel"
+                    role="tabpanel"
+                    aria-labelledby={`work-tab-${activeTab}`}
+                    className={styles.commentsPanel}
+                  >
+                    <WorkComments authorId={work.authorId} slug={work.slug} />
+                  </div>
+                )}
               </div>
             </div>
           </section>

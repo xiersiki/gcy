@@ -1,0 +1,22 @@
+title: Theme Token Demo
+summary: 展示设计 Token 在主题切换和组件样式中的落地方式，验证从变量到组件的一致性映射。
+type: demo
+date: 2026-02-10
+locale: zh
+readingTime: 6
+featured: false
+difficulty: beginner
+tags:
+  - demo
+  - design-system
+  - token
+  - theming
+category: Web App
+cover: https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80
+demo:
+  kind: iframe
+  src: /demos/gcy/theme-token-demo/index.html
+  devSrc: http://localhost:5173/
+  height: 680
+external:
+  repoUrl: https://github.com/bytedance/gcy

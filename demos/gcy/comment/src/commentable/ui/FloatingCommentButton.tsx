@@ -7,9 +7,8 @@ import styles from './FloatingCommentButton.module.css'
 export type FloatingCommentButtonProps = {
   rect: DOMRect
   direction?: 'forward' | 'backward'
-  text: string
   range?: Range
-  onClick?: (ctx: { rect: DOMRect; text: string; range?: Range }) => void
+  onClick?: () => void
 }
 
 type ClientRectLike = {
@@ -32,7 +31,6 @@ type VirtualReference = {
 export default function FloatingCommentButton({
   rect,
   direction = 'forward',
-  text,
   range,
   onClick,
 }: FloatingCommentButtonProps) {
@@ -91,7 +89,7 @@ export default function FloatingCommentButton({
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
-        onClick?.({ rect, text, range })
+        onClick?.()
       }}
       aria-label="添加评论"
     >

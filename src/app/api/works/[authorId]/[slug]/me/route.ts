@@ -6,7 +6,13 @@ import { getRequestId } from '@/server/api/request'
 import { jsonError, jsonOk } from '@/server/api/response'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 
-import { ensureSupabaseConfigured, getWorkContext } from '../_shared'
+import {
+  ensureSupabaseConfigured,
+  getWorkContext,
+  requireUserId,
+  withRequestIdHeaders,
+  workNotFoundError,
+} from '../_shared'
 
 export async function GET(
   req: Request,
@@ -18,19 +24,12 @@ export async function GET(
   if (supabaseNotConfigured) return supabaseNotConfigured
 
   const { workId, work } = await getWorkContext(ctx.params)
-  if (!work)
-    return jsonError(ApiErrorCode.NotFound, '作品不存在', 404, {
-      headers: { 'x-request-id': requestId },
-    })
+  if (!work) return workNotFoundError(requestId)
 
   const supabase = await getSupabaseServerClient()
-  const { data: userData, error: userErr } = await supabase.auth.getUser()
-  if (userErr || !userData.user)
-    return jsonError(ApiErrorCode.Unauthorized, '请先登录', 401, {
-      headers: { 'x-request-id': requestId },
-    })
-
-  const userId = userData.user.id
+  const userResult = await requireUserId(supabase, requestId)
+  if (!userResult.ok) return userResult.response
+  const userId = userResult.userId
 
   const [{ data: likeRow, error: likeErr }, { data: bookmarkRow, error: bookmarkErr }] =
     await Promise.all([
@@ -50,11 +49,11 @@ export async function GET(
 
   if (likeErr)
     return jsonError(ApiErrorCode.SupabaseError, likeErr.message, 500, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
   if (bookmarkErr)
     return jsonError(ApiErrorCode.SupabaseError, bookmarkErr.message, 500, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
 
   return jsonOk(
@@ -62,6 +61,6 @@ export async function GET(
       liked: Boolean(likeRow),
       bookmarked: Boolean(bookmarkRow),
     },
-    { headers: { 'x-request-id': requestId, 'cache-control': 'private, no-store' } },
+    { headers: withRequestIdHeaders(requestId, { 'cache-control': 'private, no-store' }) },
   )
 }

@@ -1,0 +1,22 @@
+title: Perf Lab Demo
+summary: 通过虚拟列表与可视化指标面板演示列表渲染优化，帮助快速比较不同渲染策略的开销。
+type: demo
+date: 2026-02-20
+locale: zh
+readingTime: 6
+featured: true
+difficulty: intermediate
+tags:
+  - demo
+  - performance
+  - virtual-list
+  - profiling
+category: Web App
+cover: https://images.unsplash.com/photo-1551281044-8b9a1c1f3f1a?auto=format&fit=crop&w=1200&q=80
+demo:
+  kind: iframe
+  src: /demos/gcy/perf-lab-demo/index.html
+  devSrc: http://localhost:5173/
+  height: 720
+external:
+  repoUrl: https://github.com/bytedance/gcy

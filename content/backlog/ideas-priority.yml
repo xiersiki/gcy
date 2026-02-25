@@ -1,0 +1,19 @@
+- id: idea-rich-text-comment-thread
+  priority: p0
+  reason: Builds on current comment demo and has clear production value.
+  targetType: case-study
+
+- id: idea-design-token-live-preview
+  priority: p1
+  reason: Supports theme and system-level reuse across demos.
+  targetType: demo
+
+- id: idea-content-release-dashboard
+  priority: p1
+  reason: Helps weekly content cadence and quality checks.
+  targetType: engineering
+
+- id: idea-form-schema-runtime-validator
+  priority: p2
+  reason: Useful for typed forms and schema-driven UI practice.
+  targetType: demo

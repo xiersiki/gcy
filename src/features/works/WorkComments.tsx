@@ -1,8 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 
+import { isApiRequestError, requestApiData } from '@/shared/api'
+import { useApiResource } from '@/shared/useApiResource'
 import { mutateWorkStats, revalidateWorkStats } from './hooks/useWorkStats'
 import styles from './WorkComments.module.scss'
 
@@ -22,6 +24,11 @@ type CommentItem = {
   profile: Profile | null
 }
 
+type CommentsPage = {
+  items: CommentItem[]
+  nextCursor: string | null
+}
+
 export function WorkComments({ authorId, slug }: { authorId: string; slug: string }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -32,51 +39,43 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
 
   const [items, setItems] = useState<CommentItem[]>([])
   const [nextCursor, setNextCursor] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
   const [posting, setPosting] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [draft, setDraft] = useState('')
+  const loadMoreControllerRef = useRef<AbortController | null>(null)
 
-  const load = useCallback(
-    async (before: string | null, signal?: AbortSignal) => {
-      const url = new URL(base, window.location.origin)
-      url.searchParams.set('limit', '20')
-      if (before) url.searchParams.set('before', before)
+  useEffect(() => {
+    return () => {
+      loadMoreControllerRef.current?.abort()
+    }
+  }, [])
 
-      const res = await fetch(url.toString(), { signal })
-      if (!res.ok) throw new Error(String(res.status))
-      const json = (await res.json()) as {
-        ok: true
-        data: { items: CommentItem[]; nextCursor: string | null }
-      }
-      return json.data
+  const buildCommentsUrl = (before: string | null) => {
+    const url = new URL(base, window.location.origin)
+    url.searchParams.set('limit', '20')
+    if (before) url.searchParams.set('before', before)
+    return url.toString()
+  }
+
+  const commentsResource = useApiResource<CommentsPage>(
+    base,
+    async ({ signal }) => {
+      return requestApiData<CommentsPage>(buildCommentsUrl(null), { signal })
     },
-    [base],
+    { immediate: true },
   )
 
   useEffect(() => {
-    let cancelled = false
-    const controller = new AbortController()
-    setLoading(true)
-    setError('')
-    load(null, controller.signal)
-      .then((data) => {
-        if (cancelled) return
-        setItems(data.items)
-        setNextCursor(data.nextCursor)
-        setLoading(false)
-      })
-      .catch((e) => {
-        if (cancelled) return
-        if (e instanceof Error && e.name === 'AbortError') return
-        setError('评论加载失败，请稍后重试')
-        setLoading(false)
-      })
-    return () => {
-      cancelled = true
-      controller.abort()
-    }
-  }, [load])
+    if (!commentsResource.data) return
+    setItems(commentsResource.data.items)
+    setNextCursor(commentsResource.data.nextCursor)
+  }, [commentsResource.data])
+
+  useEffect(() => {
+    if (!commentsResource.error) return
+    setError('评论加载失败，请稍后重试')
+  }, [commentsResource.error])
 
   const requireLogin = () => {
     const next = pathname ? `?next=${encodeURIComponent(pathname)}` : ''
@@ -103,12 +102,21 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
     }))
     setPosting(true)
     try {
-      const res = await fetch(base, {
+      await requestApiData<{ id: string }>(base, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ body }),
       })
-      if (res.status === 401) {
+      setDraft('')
+      void revalidateWorkStats(authorId, slug).catch(() => {})
+      const reloadResult = await commentsResource.reload()
+      if (reloadResult.ok) {
+        setItems(reloadResult.data.items)
+        setNextCursor(reloadResult.data.nextCursor)
+      }
+      setError('')
+    } catch (error) {
+      if (isApiRequestError(error) && error.status === 401) {
         setItems((prev) => prev.filter((c) => c.id !== tempId))
         mutateWorkStats(authorId, slug, (s) => ({
           ...s,
@@ -116,14 +124,6 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
         }))
         return requireLogin()
       }
-      if (!res.ok) throw new Error(String(res.status))
-      setDraft('')
-      void revalidateWorkStats(authorId, slug).catch(() => {})
-      const data = await load(null)
-      setItems(data.items)
-      setNextCursor(data.nextCursor)
-      setError('')
-    } catch {
       setItems((prev) => prev.filter((c) => c.id !== tempId))
       mutateWorkStats(authorId, slug, (s) => ({
         ...s,
@@ -142,8 +142,25 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
         <div className={styles.count}>{items.length ? `${items.length} 条` : ''}</div>
       </div>
 
-      {error ? <div className={styles.error}>{error}</div> : null}
-      {loading ? <div className={styles.hint}>加载中…</div> : null}
+      {error ? (
+        <div className={styles.error} role="alert">
+          {error}
+          <button
+            type="button"
+            className={styles.retryBtn}
+            onClick={async () => {
+              setError('')
+              const result = await commentsResource.reload()
+              if (!result.ok) {
+                setError('评论加载失败，请稍后重试')
+              }
+            }}
+          >
+            重试
+          </button>
+        </div>
+      ) : null}
+      {commentsResource.loading ? <div className={styles.hint}>加载中…</div> : null}
 
       <div className={styles.list}>
         {items.map((c) => (
@@ -165,18 +182,33 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
         <button
           type="button"
           className={styles.loadMore}
+          disabled={loadingMore}
           onClick={async () => {
+            if (!nextCursor) return
+            loadMoreControllerRef.current?.abort()
+            const controller = new AbortController()
+            loadMoreControllerRef.current = controller
+            setLoadingMore(true)
             try {
-              const data = await load(nextCursor)
+              const data = await requestApiData<CommentsPage>(buildCommentsUrl(nextCursor), {
+                signal: controller.signal,
+              })
               setItems((prev) => [...prev, ...data.items])
               setNextCursor(data.nextCursor)
               setError('')
             } catch {
-              setError('加载更多失败，请稍后重试')
+              if (!controller.signal.aborted) {
+                setError('加载更多失败，请稍后重试')
+              }
+            } finally {
+              if (loadMoreControllerRef.current === controller) {
+                loadMoreControllerRef.current = null
+                setLoadingMore(false)
+              }
             }
           }}
         >
-          加载更多
+          {loadingMore ? '加载中…' : '加载更多'}
         </button>
       ) : null}
 
@@ -188,6 +220,12 @@ export function WorkComments({ authorId, slug }: { authorId: string; slug: strin
           value={draft}
           placeholder="写下你的评论…（需要登录）"
           onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+              event.preventDefault()
+              if (!posting && draft.trim()) void submit()
+            }
+          }}
         />
         <div className={styles.actions}>
           <button

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { requestApiData } from '@/shared/api'
 
 export type WorkStats = {
   likeCount: number
@@ -32,10 +33,7 @@ export function mutateWorkStats(
 export async function revalidateWorkStats(authorId: string, slug: string) {
   const key = `${authorId}/${slug}`
   const url = `/api/works/${encodeURIComponent(authorId)}/${encodeURIComponent(slug)}/stats?_ts=${Date.now()}`
-  const res = await fetch(url, { cache: 'no-store' })
-  if (!res.ok) throw new Error(String(res.status))
-  const json = (await res.json()) as { ok: true; data: WorkStats }
-  const next = json.data
+  const next = await requestApiData<WorkStats>(url, { cache: 'no-store' })
   statsCache.set(key, { data: next, updatedAt: Date.now() })
   notifyKey(key)
 }
@@ -58,9 +56,9 @@ export function useWorkStats(authorId: string, slug: string) {
   }, [cacheKey])
 
   const cached = statsCache.get(cacheKey)
-  const [fetched, setFetched] = useState<WorkStats | null>(null)
+  const [fetched, setFetched] = useState<{ key: string; data: WorkStats } | null>(null)
 
-  const data = cached?.data ?? fetched
+  const data = cached?.data ?? (fetched?.key === cacheKey ? fetched.data : null)
 
   useEffect(() => {
     let cancelled = false
@@ -68,16 +66,14 @@ export function useWorkStats(authorId: string, slug: string) {
     const cachedNow = statsCache.get(cacheKey)
     if (cachedNow && now - cachedNow.updatedAt < 60_000) return
 
-    fetch(`/api/works/${encodeURIComponent(authorId)}/${encodeURIComponent(slug)}/stats`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(String(res.status))
-        const json = (await res.json()) as { ok: true; data: WorkStats }
-        return json.data
-      })
+    requestApiData<WorkStats>(
+      `/api/works/${encodeURIComponent(authorId)}/${encodeURIComponent(slug)}/stats`,
+    )
       .then((next) => {
         if (cancelled) return
         statsCache.set(cacheKey, { data: next, updatedAt: Date.now() })
-        setFetched(next)
+        setFetched({ key: cacheKey, data: next })
+        notifyKey(cacheKey)
       })
       .catch(() => {
         if (cancelled) return

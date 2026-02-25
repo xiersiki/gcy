@@ -1,0 +1,38 @@
+# Layout Motion Demo
+
+## 背景与目标
+
+在作品列表里，筛选和排序是高频动作。如果元素突然跳位，会增加认知负担。这个 demo 的目标是验证布局动画如何在“状态变化”与“空间连续性”之间建立桥梁，让用户知道内容发生了什么变化。
+
+## 方案与取舍
+
+我采用 FLIP 思路（First, Last, Invert, Play）实现卡片重排动画，重点在于转场清晰而非华丽效果。与纯 CSS transition 相比，FLIP 对复杂布局更稳定，但需要更多计算和状态管理。为了控制复杂度，当前版本只覆盖单列到多列的常见栅格场景。
+
+## 实现细节
+
+每次筛选前记录元素初始位置，更新数据后读取目标位置并计算位移差，再通过 transform 动画回放。进入和离开元素使用短时淡入淡出，避免视觉闪烁。为了减少布局抖动，动画帧统一放在 rAF 中提交，并对连续快速筛选做中断与重启处理。
+
+## 结果与验证
+
+用户在切换分类和标签时能够明确感知卡片去向，误点击率下降。连续操作场景下动画保持稳定，没有出现明显错位。该 demo 为后续主站列表动效升级提供了可复用实现模板。
+
+## 下一步
+
+后续将增加无障碍选项（减少动画模式）和移动端手势适配，同时沉淀一份可直接复用的动画策略清单。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

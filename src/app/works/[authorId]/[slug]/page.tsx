@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { authors, workLoaders, works } from '@/generated/content'
 import { WorkDetailClient } from '@/features/works/WorkDetailClient'
@@ -46,6 +47,8 @@ export default async function WorkPage({
       : undefined
 
   return (
-    <WorkDetailClient work={work} author={author} mdxContent={<MdxContent />} demoUrl={demoUrl} />
+    <Suspense fallback={null}>
+      <WorkDetailClient work={work} author={author} mdxContent={<MdxContent />} demoUrl={demoUrl} />
+    </Suspense>
   )
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { ExternalLink, Heart, LayoutGrid, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 
@@ -18,16 +17,10 @@ export function WorkCard({ work }: WorkCardProps) {
   const { data } = useWorkStats(work.authorId, work.slug)
 
   return (
-    <motion.div
-      className={styles.card}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className={styles.card}>
       <Link href={href} prefetch={false} className={styles.cover}>
         {work.cover ? (
-          <img src={work.cover} alt={work.title} />
+          <img src={work.cover} alt={`${work.title} cover`} loading="lazy" decoding="async" />
         ) : (
           <div className={styles.placeholder}>
             <LayoutGrid size={48} />
@@ -48,6 +41,11 @@ export function WorkCard({ work }: WorkCardProps) {
         <p className={styles.summary}>{work.summary}</p>
 
         <div className={styles.tags}>
+          {work.featured ? <span className={styles.tag}>featured</span> : null}
+          {work.difficulty ? <span className={styles.tag}>{work.difficulty}</span> : null}
+        </div>
+
+        <div className={styles.tags}>
           {work.tags?.slice(0, 3).map((tag) => (
             <Link key={tag} href={`/tags/${tag}`} prefetch={false} className={styles.tag}>
               {tag}
@@ -64,11 +62,11 @@ export function WorkCard({ work }: WorkCardProps) {
             <MessageSquare size={14} />
             <span>{data?.commentCount ?? 0}</span>
           </div>
-          <Link href={href} className={styles.actionIcon}>
+          <Link href={href} className={styles.actionIcon} aria-label={`打开作品 ${work.title}`}>
             <ExternalLink size={16} />
           </Link>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

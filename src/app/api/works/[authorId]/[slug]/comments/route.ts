@@ -5,11 +5,17 @@ import { z } from 'zod'
 
 import { ApiErrorCode } from '@/server/api/errors'
 import { getRequestId } from '@/server/api/request'
-import { checkRateLimit } from '@/server/api/ratelimit'
 import { jsonError, jsonOk } from '@/server/api/response'
 import { getSupabaseServerClient } from '@/server/supabase/server'
 
-import { ensureSupabaseConfigured, getWorkContext } from '../_shared'
+import {
+  ensureRateLimit,
+  ensureSupabaseConfigured,
+  getWorkContext,
+  requireUserId,
+  withRequestIdHeaders,
+  workNotFoundError,
+} from '../_shared'
 
 const CommentCreateSchema = z.object({
   body: z.string().trim().min(1).max(2000),
@@ -29,10 +35,7 @@ export async function GET(
   const before = requestUrl.searchParams.get('before')
 
   const { workId, work } = await getWorkContext(ctx.params)
-  if (!work)
-    return jsonError(ApiErrorCode.NotFound, '作品不存在', 404, {
-      headers: { 'x-request-id': requestId },
-    })
+  if (!work) return workNotFoundError(requestId)
 
   const supabase = await getSupabaseServerClient()
 
@@ -48,7 +51,7 @@ export async function GET(
 
   if (error)
     return jsonError(ApiErrorCode.SupabaseError, error.message, 500, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
 
   const items = (data ?? []).map((row) => ({
@@ -100,7 +103,7 @@ export async function GET(
     },
     {
       headers: {
-        'x-request-id': requestId,
+        ...withRequestIdHeaders(requestId),
       },
     },
   )
@@ -116,33 +119,23 @@ export async function POST(
   if (supabaseNotConfigured) return supabaseNotConfigured
 
   const { workId, work } = await getWorkContext(ctx.params)
-  if (!work)
-    return jsonError(ApiErrorCode.NotFound, '作品不存在', 404, {
-      headers: { 'x-request-id': requestId },
-    })
+  if (!work) return workNotFoundError(requestId)
 
-  const ip = req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'ip'
-  const limited = checkRateLimit(`comment:${ip}:${workId}`, 10, 30_000)
-  if (!limited.ok)
-    return jsonError(ApiErrorCode.RateLimited, '请求过于频繁', 429, {
-      headers: { 'x-request-id': requestId },
-    })
+  const limited = ensureRateLimit(req, requestId, `comment:${workId}`, 10, 30_000)
+  if (limited) return limited
 
   const payload = (await req.json().catch(() => null)) as unknown
   const parsed = CommentCreateSchema.safeParse(payload)
   if (!parsed.success)
     return jsonError(ApiErrorCode.BadRequest, '评论内容不合法', 400, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
 
   const supabase = await getSupabaseServerClient()
-  const { data: userData, error: userErr } = await supabase.auth.getUser()
-  if (userErr || !userData.user)
-    return jsonError(ApiErrorCode.Unauthorized, '请先登录', 401, {
-      headers: { 'x-request-id': requestId },
-    })
+  const userResult = await requireUserId(supabase, requestId)
+  if (!userResult.ok) return userResult.response
 
-  const userId = userData.user.id
+  const userId = userResult.userId
   const { data, error } = await supabase
     .from('work_comments')
     .insert({ work_id: workId, user_id: userId, body: parsed.data.body })
@@ -151,7 +144,7 @@ export async function POST(
 
   if (error)
     return jsonError(ApiErrorCode.SupabaseError, error.message, 500, {
-      headers: { 'x-request-id': requestId },
+      headers: withRequestIdHeaders(requestId),
     })
 
   return jsonOk(
@@ -163,6 +156,6 @@ export async function POST(
       createdAt: data.created_at as string,
       updatedAt: data.updated_at as string,
     },
-    { headers: { 'x-request-id': requestId } },
+    { headers: withRequestIdHeaders(requestId) },
   )
 }

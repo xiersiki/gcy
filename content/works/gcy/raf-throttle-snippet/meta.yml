@@ -1,0 +1,16 @@
+title: RAF Throttle Snippet
+summary: 一个基于 requestAnimationFrame 的节流工具片段，适用于滚动与拖拽等高频事件场景。
+type: snippet
+date: 2026-02-02
+locale: zh
+readingTime: 4
+featured: false
+difficulty: beginner
+tags:
+  - snippet
+  - performance
+  - raf
+  - utility
+category: Snippet
+external:
+  repoUrl: https://github.com/bytedance/gcy

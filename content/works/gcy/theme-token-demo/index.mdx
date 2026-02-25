@@ -1,0 +1,38 @@
+# Theme Token Demo
+
+## 背景与目标
+
+随着作品数量增长，视觉一致性会成为维护成本来源。这个 demo 的目标是验证 token-first 的主题策略：把颜色、间距、圆角、阴影统一成语义变量，再映射到组件层，减少样式分叉。
+
+## 方案与取舍
+
+方案采用 CSS 变量作为运行时 token 载体，SCSS 负责组织层级。与纯 JS 主题系统相比，CSS 变量在运行时切换更轻，且与现有样式体系兼容。取舍是需要在命名和层级上更严格，否则会出现 token 污染和语义漂移。
+
+## 实现细节
+
+首先定义基础 token（色板、间距、字号），再派生语义 token（surface、text-main、divider）。组件只消费语义 token，不直接引用原始色值。主题切换时更新根节点数据属性，由变量系统自动联动。demo 提供实时 token 面板，便于观察每次切换后的变量变化。
+
+## 结果与验证
+
+在浅色和深色主题切换时，组件视觉能够保持统一层次，不需要逐个覆盖样式。这个实验说明当前项目完全可以在不引入额外状态库的情况下实现稳定主题系统。
+
+## 下一步
+
+后续会补充高对比主题和无障碍检测，增加 token 使用率统计，识别硬编码样式的清理优先级。
+
+## 可复用片段
+
+```ts
+export function ensureArray<T>(value: T | T[] | undefined): T[] {
+  if (value == null) return []
+  return Array.isArray(value) ? value : [value]
+}
+```
+
+这个辅助函数用于统一处理可选列表输入，避免在渲染层反复判断数据形态。
+
+## 相关作品
+
+- [Comment Work](/works/gcy/comment)
+- [Portfolio Content Pipeline Case](/works/gcy/portfolio-content-pipeline-case)
+- [RAF Throttle Snippet](/works/gcy/raf-throttle-snippet)

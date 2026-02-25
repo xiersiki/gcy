@@ -1,0 +1,17 @@
+title: Comment Architecture Case
+summary: 复盘划词评论系统从原型到可协作版本的架构演进，覆盖状态管理、锚点稳定性与工程边界划分。
+type: case-study
+date: 2026-02-06
+locale: zh
+readingTime: 12
+featured: true
+difficulty: advanced
+tags:
+  - case-study
+  - comment-system
+  - architecture
+  - state-management
+category: Case Study
+cover: https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80
+external:
+  repoUrl: https://github.com/bytedance/gcy
